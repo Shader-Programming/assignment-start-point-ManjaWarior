@@ -1,7 +1,5 @@
 #version 410 core
 
-vec3 getDirectionalLight(vec3 norm, vec3 viewDir);
-
 out vec4 FragColor;
 
 in vec3 normal;
@@ -16,10 +14,27 @@ struct pointLight
     float Ke; //exponential 
 };
 
+struct spotLight
+{
+    vec3 position;
+    vec3 direction;
+    vec3 color;
+    float Kc; // constant
+    float Kl; // linear
+    float Ke; //exponential 
+
+    float innerRad;//inner and outer radius
+    float outerRad;
+};
+
 vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light);
+vec3 getDirectionalLight(vec3 norm, vec3 viewDir);
 
 #define numPointLights 3
 uniform pointLight pLight[numPointLights];
+
+uniform spotLight sLight;
+
 uniform vec3 lightCol;
 uniform vec3 lightDir;
 uniform vec3 objectCol;
@@ -76,17 +91,42 @@ vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light)
     //diffuse
     float diffuseFactor = dot(norm, pLightDir);
     diffuseFactor = max(diffuseFactor,0.0);
-    vec3 diffuseColor = lightCol*objectCol*diffuseFactor;
+    vec3 diffuseColor = light.color*objectCol*diffuseFactor;
     diffuseColor = diffuseColor*attn;
     //specular
     vec3 reflectDir = reflect(pLightDir, norm);//maybe change to blinn-phong later?
     float specularFactor = dot(viewDir, reflectDir);
     specularFactor = max(specularFactor, 0.0);
     specularFactor = pow(specularFactor, shine);
-    vec3 specularColor = lightCol * specularFactor * specularStrength;
+    vec3 specularColor = light.color * specularFactor * specularStrength;
     specularColor = specularColor*attn;
     vec3 pointLightResult = ambientColor + diffuseColor + specularColor;
 
     return pointLightResult;
 }
 
+vec3 getSpotLight(vec3 norm, vec3 viewDir)
+{
+
+    //spot light
+    float dist = length(sLight.position - posWS);
+    float attn = 1.0/(sLight.Kc + (sLight.Kl*dist) + (sLight.Ke*(dist*dist)));
+    vec3 sLightDir = normalize(sLight.position - posWS);
+    //diffuse
+    float diffuseFactor = dot(norm, sLightDir);
+    diffuseFactor = max(diffuseFactor,0.0);
+    vec3 diffuseColor = sLight.color*objectCol*diffuseFactor;
+    diffuseColor = diffuseColor*attn;
+    //specular
+    vec3 reflectDir = reflect(sLightDir, norm);//maybe change to blinn-phong later?
+    float specularFactor = dot(viewDir, reflectDir);
+    specularFactor = max(specularFactor, 0.0);
+    specularFactor = pow(specularFactor, shine);
+    vec3 specularColor = sLight.color * specularFactor * specularStrength;
+    specularColor = specularColor*attn;
+
+
+
+    vec3 spotLightResult = diffuseColor + specularColor;
+    return spotLightResult;
+}
