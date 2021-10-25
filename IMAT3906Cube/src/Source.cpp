@@ -28,6 +28,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 
+//own functions
+void setUniforms(Shader& shader);
 
 // camera
 Camera camera(glm::vec3(0,0,9));
@@ -77,15 +79,8 @@ int main()
 	//Renderer
 	Renderer renderer(SCR_WIDTH, SCR_WIDTH);
 
+	setUniforms(shader);
 
-	glm::vec3 lightDirection = glm::vec3(0, -1, 0);
-	glm::vec3 lightColor = glm::vec3(1.0, 1.0, 1.0);
-
-	glm::vec3 cubeColor = glm::vec3(1.0, 0.4, 0.4);
-	glm::vec3 floorColor = glm::vec3(0.1, 0.3, 0.3);
-
-	shader.setVec3("lightCol", lightColor);
-	shader.setVec3("lightDir", lightDirection);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -160,7 +155,40 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	camera.ProcessMouseScroll(yoffset);
 }
 
+void setUniforms(Shader& shader)
+{
+	//directional light
+	glm::vec3 lightDirection = glm::vec3(0, -1, 0);
+	glm::vec3 lightColor = glm::vec3(1.0, 1.0, 1.0);
 
+	shader.setVec3("lightCol", lightColor);
+	shader.setVec3("lightDir", lightDirection);
+
+	//spot light
+	glm::vec3 pLightPos = glm::vec3(1.0, 1.0, 1.0);
+	glm::vec3 pLightCol = glm::vec3(5.0, 0.0, 0.0);
+	glm::vec3 pLightPos2 = glm::vec3(2.0, 2.0, 2.0);
+	glm::vec3 pLightPos3 = glm::vec3(3.0, 3.0, 3.0);
+	float Kc = 1.0f;
+	float Kl = 0.22f;
+	float Ke = 0.2f;
+
+	shader.setVec3("pLight[0].position", pLightPos);
+	shader.setVec3("pLight[0].color", pLightCol);
+	shader.setFloat("pLight[0].Kc", Kc);
+	shader.setFloat("pLight[0].Kl", Kl);
+	shader.setFloat("pLight[0].Ke", Ke);
+	shader.setVec3("pLight[1].position", pLightPos2);
+	shader.setVec3("pLight[1].color", pLightCol);
+	shader.setFloat("pLight[1].Kc", Kc);
+	shader.setFloat("pLight[1].Kl", Kl);
+	shader.setFloat("pLight[1].Ke", Ke);	
+	shader.setVec3("pLight[2].position", pLightPos3);
+	shader.setVec3("pLight[2].color", pLightCol);
+	shader.setFloat("pLight[2].Kc", Kc);
+	shader.setFloat("pLight[2].Kl", Kl);
+	shader.setFloat("pLight[2].Ke", Ke);
+}
 
 
 
