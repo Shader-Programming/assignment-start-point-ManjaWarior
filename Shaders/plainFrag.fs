@@ -20,8 +20,8 @@ struct spotLight
     vec3 direction;
     vec3 color;
     float Kc; // constant
-    float Kl; // linear
-    float Ke; //exponential 
+    float Kl; 
+    float Ke; 
 
     float innerRad;//inner and outer radius
     float outerRad;
@@ -29,6 +29,7 @@ struct spotLight
 
 vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light);
 vec3 getDirectionalLight(vec3 norm, vec3 viewDir);
+vec3 getSpotLight(vec3 norm, vec3 viewDir);
 
 #define numPointLights 3
 uniform pointLight pLight[numPointLights];
@@ -54,6 +55,9 @@ void main()
     {
         result = result + getPointLight(norm, viewDir, pLight[i]);
     }
+
+    vec3 spotLight = getSpotLight(norm, viewDir);
+    result = result + spotLight;
 
     FragColor = vec4(result, 1.0);
 }
@@ -125,7 +129,12 @@ vec3 getSpotLight(vec3 norm, vec3 viewDir)
     vec3 specularColor = sLight.color * specularFactor * specularStrength;
     specularColor = specularColor*attn;
 
-
+    float theta = dot(-sLightDir, normalize(sLight.direction));
+    float denom = (sLight.innerRad - sLight.outerRad);
+    float illum = (theta - sLight.outerRad) / denom;
+    illum = clamp(illum, 0.0,1.0);
+    diffuseColor = diffuseColor * illum;
+    specularColor = specularColor * illum;
 
     vec3 spotLightResult = diffuseColor + specularColor;
     return spotLightResult;
