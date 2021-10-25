@@ -59,6 +59,8 @@ void main()
     vec3 spotLight = getSpotLight(norm, viewDir);
     result = result + spotLight;
 
+    //need to implement Rim Lighting
+
     FragColor = vec4(result, 1.0);
 }
 
