@@ -167,11 +167,11 @@ void setUniforms(Shader& shader)
 	shader.setVec3("lightCol", lightColor);
 	shader.setVec3("lightDir", lightDirection);
 
-	//spot light
-	glm::vec3 pLightPos = glm::vec3(1.0, 1.0, 1.0);
+	//point light
+	glm::vec3 pLightPos = glm::vec3(0.0, -1.0, 1.0);
 	glm::vec3 pLightCol = glm::vec3(5.0, 0.0, 0.0);
-	glm::vec3 pLightPos2 = glm::vec3(2.0, 1.0, 1.0);
-	glm::vec3 pLightPos3 = glm::vec3(3.0, 1.0, 1.0);
+	glm::vec3 pLightPos2 = glm::vec3(-4.0, 0.0, 1.0);
+	glm::vec3 pLightPos3 = glm::vec3(4.0, 0.0, 1.0);
 	float Kc = 1.0f;
 	float Kl = 0.22f;
 	float Ke = 0.2f;
@@ -192,8 +192,8 @@ void setUniforms(Shader& shader)
 	shader.setFloat("pLight[2].Kl", Kl);
 	shader.setFloat("pLight[2].Ke", Ke);
 
-	//spot light
 
+	//spot light
 	shader.setVec3("sLight.color", glm::vec3(0.1f, 0.1f, 0.1f));
 	shader.setFloat("sLight.kC", 1.0f);
 	shader.setFloat("sLight.Kl", 0.027f);
