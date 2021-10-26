@@ -26,13 +26,13 @@ const unsigned int SCR_HEIGHT = 900;
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow *window);
+void processInput(GLFWwindow* window);
 
 //own functions
 void setUniforms(Shader& shader);
 
 // camera
-Camera camera(glm::vec3(0,0,9));
+Camera camera(glm::vec3(0, 0, 9));
 
 
 float lastX = SCR_WIDTH / 2.0f;
@@ -92,7 +92,7 @@ int main()
 		shader.setVec3("sLight.direction", (camera.Front));
 
 		processInput(window);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);   // what happens if we change to GL_LINE?
 
@@ -108,7 +108,7 @@ int main()
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window)
+void processInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
@@ -170,8 +170,8 @@ void setUniforms(Shader& shader)
 	//spot light
 	glm::vec3 pLightPos = glm::vec3(1.0, 1.0, 1.0);
 	glm::vec3 pLightCol = glm::vec3(5.0, 0.0, 0.0);
-	glm::vec3 pLightPos2 = glm::vec3(2.0, 2.0, 2.0);
-	glm::vec3 pLightPos3 = glm::vec3(3.0, 3.0, 3.0);
+	glm::vec3 pLightPos2 = glm::vec3(2.0, 1.0, 1.0);
+	glm::vec3 pLightPos3 = glm::vec3(3.0, 1.0, 1.0);
 	float Kc = 1.0f;
 	float Kl = 0.22f;
 	float Ke = 0.2f;
@@ -185,7 +185,7 @@ void setUniforms(Shader& shader)
 	shader.setVec3("pLight[1].color", pLightCol);
 	shader.setFloat("pLight[1].Kc", Kc);
 	shader.setFloat("pLight[1].Kl", Kl);
-	shader.setFloat("pLight[1].Ke", Ke);	
+	shader.setFloat("pLight[1].Ke", Ke);
 	shader.setVec3("pLight[2].position", pLightPos3);
 	shader.setVec3("pLight[2].color", pLightCol);
 	shader.setFloat("pLight[2].Kc", Kc);

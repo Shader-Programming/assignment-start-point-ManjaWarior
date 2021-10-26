@@ -60,7 +60,6 @@ void Cube::createCube()
 
 
 	glm::vec3 cubeColor = glm::vec3(1.0, 0.4, 0.4);
-	glm::vec3 floorColor = glm::vec3(0.1, 0.3, 0.3);//might need moving?
 
 	glGenVertexArrays(1, &cubeVAO);
 	glGenBuffers(1, &cubeVBO);

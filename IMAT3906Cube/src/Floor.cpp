@@ -19,6 +19,7 @@ void Floor::createFloor()
 	glGenBuffers(1, &floorEBO);
 
 	glBindVertexArray(floorVAO);
+	glm::vec3 floorColor = glm::vec3(0.1, 0.3, 0.3);
 
 	glBindBuffer(GL_ARRAY_BUFFER, floorVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(floorVertices), floorVertices, GL_STATIC_DRAW);
