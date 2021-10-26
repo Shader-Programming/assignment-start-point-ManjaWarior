@@ -19,7 +19,7 @@ class Renderer
 {
 public:
 	Renderer(unsigned int sW, unsigned int sH);
-	void renderScene(Shader& shader, Camera cam);
+	void renderScene(Shader& shader, Camera& cam);
 
 private:
 	void renderCubes(Shader& shader);

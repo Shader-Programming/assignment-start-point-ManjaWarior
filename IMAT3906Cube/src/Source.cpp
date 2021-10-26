@@ -77,7 +77,7 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 
 	//Renderer
-	Renderer renderer(SCR_WIDTH, SCR_WIDTH);
+	Renderer renderer(SCR_WIDTH, SCR_HEIGHT);
 
 	setUniforms(shader);
 
