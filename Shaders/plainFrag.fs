@@ -77,7 +77,7 @@ vec3 getDirectionalLight(vec3 norm, vec3 viewDir)
     //diffuse light
     float diffuseFactor = dot(norm, -lightDir);
     diffuseFactor = max(diffuseFactor,0.0);
-    vec3 diffuseColor = lightCol*objectCol*diffuseFactor;
+    vec3 diffuseColor = lightCol * objectCol * diffuseFactor;
 
     //specular light 
     vec3 halfwayDir = normalize(viewDir - lightDir);
