@@ -88,8 +88,8 @@ int main()
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
-		shader.setVec3("sLight.position", camera.Position);
-		shader.setVec3("sLight.direction", (camera.Front));
+		shader.setVec3("sLight[0].position", camera.Position);
+		shader.setVec3("sLight[0].direction", (camera.Front));
 
 		processInput(window);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -194,12 +194,22 @@ void setUniforms(Shader& shader)
 
 
 	//spot light
-	shader.setVec3("sLight.color", glm::vec3(0.1f, 0.1f, 0.1f));
-	shader.setFloat("sLight.kC", 1.0f);
-	shader.setFloat("sLight.Kl", 0.027f);
-	shader.setFloat("sLight.Ke", 0.0028f);
-	shader.setFloat("sLight.innerRad", glm::cos(glm::radians(12.5f)));
-	shader.setFloat("sLight.outerRad", glm::cos(glm::radians(17.5f)));
+
+	shader.setVec3("sLight[0].color", glm::vec3(0.1f, 0.1f, 0.1f));
+	shader.setFloat("sLight[0].kC", 1.0f);
+	shader.setFloat("sLight[0].Kl", 0.027f);
+	shader.setFloat("sLight[0].Ke", 0.0028f);
+	shader.setFloat("sLight[0].innerRad", glm::cos(glm::radians(12.5f)));
+	shader.setFloat("sLight[0].outerRad", glm::cos(glm::radians(17.5f)));
+
+	shader.setVec3("sLight[1].position", glm::vec3(2.5, 3.0, -3.5));
+	shader.setVec3("sLight[1].direction", glm::vec3(0.0, -1.0, 0.0));
+	shader.setVec3("sLight[1].color", glm::vec3(0.1f, 0.1f, 0.1f));
+	shader.setFloat("sLight[1].kC", 1.0f);
+	shader.setFloat("sLight[1].Kl", 0.027f);
+	shader.setFloat("sLight[1].Ke", 0.0028f);
+	shader.setFloat("sLight[1].innerRad", glm::cos(glm::radians(12.5f)));
+	shader.setFloat("sLight[1].outerRad", glm::cos(glm::radians(17.5f)));
 
 }
 

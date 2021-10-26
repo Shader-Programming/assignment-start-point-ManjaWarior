@@ -29,12 +29,13 @@ struct spotLight
 
 vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light);
 vec3 getDirectionalLight(vec3 norm, vec3 viewDir);
-vec3 getSpotLight(vec3 norm, vec3 viewDir);
+vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light);
 
 #define numPointLights 3
 uniform pointLight pLight[numPointLights];
 
-uniform spotLight sLight;
+#define numSpotLights 2
+uniform spotLight sLight[numSpotLights];
 
 uniform vec3 lightCol;
 uniform vec3 lightDir;
@@ -56,10 +57,12 @@ void main()
         result = result + getPointLight(norm, viewDir, pLight[i]);
     }
 
-    vec3 spotLight = getSpotLight(norm, viewDir);
-    result = result + spotLight;
+    for(int i = 0; i < numSpotLights; i++)
+    {
+        result = result + getSpotLight(norm, viewDir, sLight[i]);
+    }
 
-    float rimLight = 0.2*(1.0-dot(norm, viewDir));
+    float rimLight = 0.075*(1.0-dot(norm, viewDir));
     rimLight = pow(rimLight, 0.5);
     result = result + rimLight;
 
@@ -113,29 +116,29 @@ vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light)
     return pointLightResult;
 }
 
-vec3 getSpotLight(vec3 norm, vec3 viewDir)
+vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light)
 {
 
     //spot light
-    float dist = length(sLight.position - posWS);
-    float attn = 1.0/(sLight.Kc + (sLight.Kl*dist) + (sLight.Ke*(dist*dist)));
-    vec3 sLightDir = normalize(sLight.position - posWS);
+    float dist = length(light.position - posWS);
+    float attn = 1.0/(light.Kc + (light.Kl*dist) + (light.Ke*(dist*dist)));
+    vec3 sLightDir = normalize(light.position - posWS);
     //diffuse
     float diffuseFactor = dot(norm, sLightDir);
     diffuseFactor = max(diffuseFactor,0.0);
-    vec3 diffuseColor = sLight.color*objectCol*diffuseFactor;
+    vec3 diffuseColor = light.color*objectCol*diffuseFactor;
     diffuseColor = diffuseColor*attn;
     //specular
     vec3 reflectDir = reflect(sLightDir, norm);//maybe change to blinn-phong later?
     float specularFactor = dot(viewDir, reflectDir);
     specularFactor = max(specularFactor, 0.0);
     specularFactor = pow(specularFactor, shine);
-    vec3 specularColor = sLight.color * specularFactor * specularStrength;
+    vec3 specularColor = light.color * specularFactor * specularStrength;
     specularColor = specularColor*attn;
 
-    float theta = dot(-sLightDir, normalize(sLight.direction));
-    float denom = (sLight.innerRad - sLight.outerRad);
-    float illum = (theta - sLight.outerRad) / denom;
+    float theta = dot(-sLightDir, normalize(light.direction));
+    float denom = (light.innerRad - light.outerRad);
+    float illum = (theta - light.outerRad) / denom;
     illum = clamp(illum, 0.0,1.0);
     diffuseColor = diffuseColor * illum;
     specularColor = specularColor * illum;
