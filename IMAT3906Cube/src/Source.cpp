@@ -73,6 +73,8 @@ int main()
 	}
 
 	unsigned int diffTexture = loadTexture("..\\resources\\SampleTextures\\metalPlate\\diffuse.jpg");
+	unsigned int specTexture = loadTexture("..\\resources\\SampleTextures\\metalPlate\\specular.jpg");
+
 
 	// simple vertex and fragment shader 
 	Shader shader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
@@ -80,8 +82,12 @@ int main()
 	glEnable(GL_DEPTH_TEST);
 	//textures
 	shader.setInt("diffuseTexture", 0);
+	shader.setInt("specularTexture", 1);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, diffTexture);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, specTexture);
+
 
 	//Renderer
 	Renderer renderer(SCR_WIDTH, SCR_HEIGHT);
