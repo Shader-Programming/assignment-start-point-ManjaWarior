@@ -77,12 +77,12 @@ int main()
 
 
 	// simple vertex and fragment shader 
-	Shader shader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
-	shader.use();
+	Shader cubeShader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
+	cubeShader.use();
 	glEnable(GL_DEPTH_TEST);
 	//textures
-	shader.setInt("diffuseTexture", 0);
-	shader.setInt("specularTexture", 1);
+	cubeShader.setInt("diffuseTexture", 0);
+	cubeShader.setInt("specularTexture", 1);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, diffTexture);
 	glActiveTexture(GL_TEXTURE1);
@@ -92,7 +92,7 @@ int main()
 	//Renderer
 	Renderer renderer(SCR_WIDTH, SCR_HEIGHT);
 
-	setUniforms(shader);
+	setUniforms(cubeShader);
 
 
 	while (!glfwWindowShouldClose(window))
@@ -101,15 +101,15 @@ int main()
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
-		shader.setVec3("sLight[0].position", camera.Position);
-		shader.setVec3("sLight[0].direction", (camera.Front));
+		cubeShader.setVec3("sLight[0].position", camera.Position);
+		cubeShader.setVec3("sLight[0].direction", (camera.Front));
 
 		processInput(window);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);   // what happens if we change to GL_LINE?
 
-		renderer.renderScene(shader, camera);
+		renderer.renderScene(cubeShader, camera);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
