@@ -43,6 +43,8 @@ uniform vec3 lightDir;
 uniform vec3 objectCol;
 uniform vec3 viewPos;
 
+uniform sampler2D diffuseTexture;
+
 float ambientFactor = 0.5f;
 float shine = 128;
 float specularStrength = 0.4f;
@@ -53,7 +55,9 @@ void main()
     vec3 viewDir = normalize(viewPos - posWS);
     vec3 result = vec3(0.0f);
 
-    for(int i = 0; i < numPointLights; i++)
+    result = result + getDirectionalLight(norm, viewDir);
+
+    /*for(int i = 0; i < numPointLights; i++)
     {
         result = result + getPointLight(norm, viewDir, pLight[i]);
     }
@@ -63,22 +67,23 @@ void main()
         result = result + getSpotLight(norm, viewDir, sLight[i]);
     }
 
-    float rimLight = 0.075*(1.0-dot(norm, viewDir));
+    float rimLight = 0.075*(1.0-dot(norm, viewDir));//apply to cubes but not floor, big Flan said so
     rimLight = pow(rimLight, 0.5);
-    result = result + rimLight;
+    result = result + rimLight;*/
 
     FragColor = vec4(result, 1.0);
 }
 
 vec3 getDirectionalLight(vec3 norm, vec3 viewDir)
 {
+    vec3 diffMapColor = texture(diffuseTexture, uv).xyz;
     //ambient light
-    vec3 ambientColor = lightCol*objectCol*ambientFactor;
+    vec3 ambientColor = lightCol*diffMapColor*ambientFactor;
 
     //diffuse light
     float diffuseFactor = dot(norm, -lightDir);
     diffuseFactor = max(diffuseFactor,0.0);
-    vec3 diffuseColor = lightCol * objectCol * diffuseFactor;
+    vec3 diffuseColor = lightCol * diffMapColor * diffuseFactor;
 
     //specular light 
     vec3 halfwayDir = normalize(viewDir - lightDir);

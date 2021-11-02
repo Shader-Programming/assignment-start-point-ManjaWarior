@@ -72,12 +72,16 @@ int main()
 		return -1;
 	}
 
-	unsigned int myTexture = loadTexture("..\\resources\\SampleTextures\\metalPlate\\diffuse.jpg");
+	unsigned int diffTexture = loadTexture("..\\resources\\SampleTextures\\metalPlate\\diffuse.jpg");
 
 	// simple vertex and fragment shader 
 	Shader shader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
 	shader.use();
 	glEnable(GL_DEPTH_TEST);
+	//textures
+	shader.setInt("diffuseTexture", 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, diffTexture);
 
 	//Renderer
 	Renderer renderer(SCR_WIDTH, SCR_HEIGHT);
