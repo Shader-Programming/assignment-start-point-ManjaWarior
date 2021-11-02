@@ -4,6 +4,7 @@ out vec4 FragColor;
 
 in vec3 normal;
 in vec3 posWS;
+in vec2 uv;
 
 struct pointLight
 {
