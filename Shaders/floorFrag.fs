@@ -69,10 +69,6 @@ void main()
         result = result + getSpotLight(norm, viewDir, sLight[i]);
     }
 
-    float rimLight = 0.075*(1.0-dot(norm, viewDir));
-    rimLight = pow(rimLight, 0.5);
-    result = result + rimLight;
-
     FragColor = vec4(result, 1.0);
 }
 
@@ -149,7 +145,7 @@ vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light)
     specularFactor = max(specularFactor, 0.0);
     specularFactor = pow(specularFactor, shine);
     vec3 specularColor = light.color * specularFactor * specMapColor;
-    specularColor = specularColor * attn;
+    specularColor = specularColor;
 
     float theta = dot(-sLightDir, normalize(light.direction));
     float denom = (light.innerRad - light.outerRad);

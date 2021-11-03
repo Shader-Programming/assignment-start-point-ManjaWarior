@@ -4,27 +4,41 @@ Renderer::Renderer(unsigned int sW, unsigned int sH)
 {
 	cube1.createCube();
 	floor1.createFloor();
+	loadTextureFiles();
 	screenW = sW;
 	screenH = sH;
 }
 
-void Renderer::renderScene(Shader& shader, Camera& camera)
+void Renderer::renderScene(Shader& shader, Shader& floorShader, Camera& camera)
 {
 	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)screenW / (float)screenH, 0.1f, 1000.0f);
 	glm::mat4 view = camera.GetViewMatrix();
 	glm::mat4 model = glm::mat4(1.0f);
+	shader.use();
 	shader.setMat4("projection", projection);
 	shader.setMat4("view", view);
 	shader.setMat4("model", model);
 	shader.setVec3("viewPos", camera.Position);
-
 	renderCubes(shader);
-	renderFloor(shader);
+
+	floorShader.use();
+	floorShader.setMat4("projection", projection);
+	floorShader.setMat4("view", view);
+	floorShader.setMat4("model", model);
+	floorShader.setVec3("viewPos", camera.Position);
+	renderFloor(floorShader);
 }
 
 void Renderer::renderCubes(Shader& shader)
 {
+	shader.use();
 	shader.setVec3("objectCol", cube1.cubeColor);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, cubeDiffuse);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, cubeSpec);
+
 	glBindVertexArray(cube1.cubeVAO);  // bind and draw cube
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 	glm::mat4 model = glm::mat4(1.0f);
@@ -43,6 +57,12 @@ void Renderer::renderCubes(Shader& shader)
 
 void Renderer::renderFloor(Shader& shader)
 {
+	shader.use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, floorDiffuse);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, floorSpec);
+
 	glm::mat4 model = glm::mat4(1.0f);
 	shader.setMat4("model", model);
 
@@ -51,4 +71,47 @@ void Renderer::renderFloor(Shader& shader)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
+void Renderer::loadTextureFiles()
+{
+	cubeDiffuse = loadTexture("..\\resources\\SampleTextures\\metalPlate\\diffuse.jpg");
+	cubeSpec = loadTexture("..\\resources\\SampleTextures\\metalPlate\\specular.jpg");
+	floorDiffuse = loadTexture("..\\resources\\SampleTextures\\metalRust\\diffuse.jpg");
+	floorSpec = loadTexture("..\\resources\\SampleTextures\\metalRust\\specular.jpg");
+}
 
+unsigned int Renderer::loadTexture(char const* path)
+{
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, nrComponents;
+	unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
+
+	if (data)
+	{
+		GLenum format;
+		if (nrComponents == 1)
+			format = GL_RED;
+		else if (nrComponents == 3)
+			format = GL_RGB;
+		else if (nrComponents == 4)
+			format = GL_RGBA;
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //S == x axis
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); //T == y axis
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		stbi_image_free(data);
+		std::cout << "Loaded texture at path: " << path << " width " << width << " id " << textureID << std::endl;
+	}
+	else
+	{
+		std::cout << "Texture failed to load at path: " << path << std::endl;
+		stbi_image_free(data);
+	}
+	return textureID;
+}

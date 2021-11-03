@@ -29,8 +29,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 
 //own functions
-void setUniforms(Shader& shader);
-unsigned int loadTexture(char const* path);
+void setUniforms(Shader& shader, Shader& shader2);
 
 // camera
 Camera camera(glm::vec3(0, 0, 9));
@@ -72,27 +71,19 @@ int main()
 		return -1;
 	}
 
-	unsigned int diffTexture = loadTexture("..\\resources\\SampleTextures\\metalPlate\\diffuse.jpg");
-	unsigned int specTexture = loadTexture("..\\resources\\SampleTextures\\metalPlate\\specular.jpg");
-
-
-	// simple vertex and fragment shader 
-	Shader cubeShader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
-	cubeShader.use();
 	glEnable(GL_DEPTH_TEST);
-	//textures
-	cubeShader.setInt("diffuseTexture", 0);
-	cubeShader.setInt("specularTexture", 1);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, diffTexture);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, specTexture);
-
 
 	//Renderer
 	Renderer renderer(SCR_WIDTH, SCR_HEIGHT);
 
-	setUniforms(cubeShader);
+	// simple vertex and fragment shader 
+	Shader cubeShader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
+	Shader floorShader("..\\shaders\\plainVert.vs", "..\\shaders\\floorFrag.fs");
+
+	//cubeShader.use();
+	//floorShader.use();
+
+	setUniforms(cubeShader, floorShader);
 
 
 	while (!glfwWindowShouldClose(window))
@@ -109,7 +100,7 @@ int main()
 
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);   // what happens if we change to GL_LINE?
 
-		renderer.renderScene(cubeShader, camera);
+		renderer.renderScene(cubeShader, floorShader, camera);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
@@ -171,14 +162,19 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	camera.ProcessMouseScroll(yoffset);
 }
 
-void setUniforms(Shader& shader)
+void setUniforms(Shader& shader, Shader& floorShader)
 {
+	shader.use();
 	//directional light
 	glm::vec3 lightDirection = glm::vec3(0, -1, 0);
 	glm::vec3 lightColor = glm::vec3(1.0, 1.0, 1.0);
 
 	shader.setVec3("lightCol", lightColor);
 	shader.setVec3("lightDir", lightDirection);
+
+	//cube textures
+	shader.setInt("diffuseTexture", 0);
+	shader.setInt("specularTexture", 1);
 
 	//point light
 	glm::vec3 pLightPos = glm::vec3(0.0, -1.0, 1.0);
@@ -205,9 +201,7 @@ void setUniforms(Shader& shader)
 	shader.setFloat("pLight[2].Kl", Kl);
 	shader.setFloat("pLight[2].Ke", Ke);
 
-
 	//spot light
-
 	shader.setVec3("sLight[0].color", glm::vec3(0.1f, 0.1f, 0.1f));
 	shader.setFloat("sLight[0].kC", 1.0f);
 	shader.setFloat("sLight[0].Kl", 0.027f);
@@ -224,43 +218,52 @@ void setUniforms(Shader& shader)
 	shader.setFloat("sLight[1].innerRad", glm::cos(glm::radians(12.5f)));
 	shader.setFloat("sLight[1].outerRad", glm::cos(glm::radians(17.5f)));
 
+
+	//Floor Shader
+	floorShader.use();
+	//directional light
+	floorShader.setVec3("lightCol", lightColor);
+	floorShader.setVec3("lightDir", lightDirection);
+
+	//floor textures
+	floorShader.setInt("diffuseTexture", 0);
+	floorShader.setInt("specularTexture", 1);
+
+	//point light
+	floorShader.setVec3("pLight[0].position", pLightPos);
+	floorShader.setVec3("pLight[0].color", pLightCol);
+	floorShader.setFloat("pLight[0].Kc", Kc);
+	floorShader.setFloat("pLight[0].Kl", Kl);
+	floorShader.setFloat("pLight[0].Ke", Ke);
+	floorShader.setVec3("pLight[1].position", pLightPos2);
+	floorShader.setVec3("pLight[1].color", pLightCol);
+	floorShader.setFloat("pLight[1].Kc", Kc);
+	floorShader.setFloat("pLight[1].Kl", Kl);
+	floorShader.setFloat("pLight[1].Ke", Ke);
+	floorShader.setVec3("pLight[2].position", pLightPos3);
+	floorShader.setVec3("pLight[2].color", pLightCol);
+	floorShader.setFloat("pLight[2].Kc", Kc);
+	floorShader.setFloat("pLight[2].Kl", Kl);
+	floorShader.setFloat("pLight[2].Ke", Ke);
+
+	//spot light
+	floorShader.setVec3("sLight[0].color", glm::vec3(0.1f, 0.1f, 0.1f));
+	floorShader.setFloat("sLight[0].kC", 1.0f);
+	floorShader.setFloat("sLight[0].Kl", 0.027f);
+	floorShader.setFloat("sLight[0].Ke", 0.0028f);
+	floorShader.setFloat("sLight[0].innerRad", glm::cos(glm::radians(12.5f)));
+	floorShader.setFloat("sLight[0].outerRad", glm::cos(glm::radians(17.5f)));
+
+	floorShader.setVec3("sLight[1].position", glm::vec3(2.5, 3.0, -3.5));
+	floorShader.setVec3("sLight[1].direction", glm::vec3(0.0, -1.0, 0.0));
+	floorShader.setVec3("sLight[1].color", glm::vec3(0.1f, 0.1f, 0.1f));
+	floorShader.setFloat("sLight[1].kC", 1.0f);
+	floorShader.setFloat("sLight[1].Kl", 0.027f);
+	floorShader.setFloat("sLight[1].Ke", 0.0028f);
+	floorShader.setFloat("sLight[1].innerRad", glm::cos(glm::radians(12.5f)));
+	floorShader.setFloat("sLight[1].outerRad", glm::cos(glm::radians(17.5f)));
 }
 
-unsigned int loadTexture(char const* path)
-{
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
 
-	int width, height, nrComponents;
-	unsigned char* data = stbi_load(path, &width, &height, &nrComponents, 0);
-
-	if (data)
-	{
-		GLenum format;
-		if (nrComponents == 1)
-			format = GL_RED;
-		else if (nrComponents == 3)
-			format = GL_RGB;
-		else if (nrComponents == 4)
-			format = GL_RGBA;
-
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //S == x axis
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); //T == y axis
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		stbi_image_free(data);
-		std::cout << "Loaded texture at path: " << path << " width " << width << " id " << textureID << std::endl;
-	}
-	else
-	{
-		std::cout << "Texture failed to load at path: " << path << std::endl;
-		stbi_image_free(data);
-	}
-	return textureID;
-}
 
 

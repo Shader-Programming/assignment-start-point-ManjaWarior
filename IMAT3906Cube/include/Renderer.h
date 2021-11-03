@@ -3,7 +3,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
+#include <stb_image.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -19,16 +19,20 @@ class Renderer
 {
 public:
 	Renderer(unsigned int sW, unsigned int sH);
-	void renderScene(Shader& shader, Camera& cam);
+	void renderScene(Shader& shader, Shader& floorShader, Camera& cam);
 
 private:
 	void renderCubes(Shader& shader);
 	void renderFloor(Shader& shader);
+
+	void loadTextureFiles();
+	unsigned int loadTexture(char const* path);
 
 	Cube cube1;
 	Floor floor1;
 
 	unsigned int screenW, screenH;
 
+	unsigned int cubeDiffuse, cubeSpec, floorDiffuse, floorSpec;
 };
 #endif
