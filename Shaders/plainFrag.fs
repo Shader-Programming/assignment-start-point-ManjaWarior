@@ -149,7 +149,7 @@ vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light)
     specularFactor = max(specularFactor, 0.0);
     specularFactor = pow(specularFactor, shine);
     vec3 specularColor = light.color * specularFactor * specMapColor;
-    specularColor = specularColor*attn * specMapColor;
+    specularColor = specularColor;
 
     float theta = dot(-sLightDir, normalize(light.direction));
     float denom = (light.innerRad - light.outerRad);
