@@ -80,11 +80,7 @@ int main()
 	Shader cubeShader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
 	Shader floorShader("..\\shaders\\plainVert.vs", "..\\shaders\\floorFrag.fs");
 
-	//cubeShader.use();
-	//floorShader.use();
-
 	setUniforms(cubeShader, floorShader);
-
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -92,8 +88,12 @@ int main()
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
+		cubeShader.use();
 		cubeShader.setVec3("sLight[0].position", camera.Position);
 		cubeShader.setVec3("sLight[0].direction", (camera.Front));
+		floorShader.use();
+		floorShader.setVec3("sLight[0].position", camera.Position);
+		floorShader.setVec3("sLight[0].direction", (camera.Front));
 
 		processInput(window);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -162,19 +162,19 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	camera.ProcessMouseScroll(yoffset);
 }
 
-void setUniforms(Shader& shader, Shader& floorShader)
+void setUniforms(Shader& cubeShader, Shader& floorShader)
 {
-	shader.use();
+	cubeShader.use();
 	//directional light
 	glm::vec3 lightDirection = glm::vec3(0, -1, 0);
 	glm::vec3 lightColor = glm::vec3(1.0, 1.0, 1.0);
 
-	shader.setVec3("lightCol", lightColor);
-	shader.setVec3("lightDir", lightDirection);
+	cubeShader.setVec3("lightCol", lightColor);
+	cubeShader.setVec3("lightDir", lightDirection);
 
 	//cube textures
-	shader.setInt("diffuseTexture", 0);
-	shader.setInt("specularTexture", 1);
+	cubeShader.setInt("diffuseTexture", 0);
+	cubeShader.setInt("specularTexture", 1);
 
 	//point light
 	glm::vec3 pLightPos = glm::vec3(0.0, -1.0, 1.0);
@@ -185,38 +185,38 @@ void setUniforms(Shader& shader, Shader& floorShader)
 	float Kl = 0.22f;
 	float Ke = 0.2f;
 
-	shader.setVec3("pLight[0].position", pLightPos);
-	shader.setVec3("pLight[0].color", pLightCol);
-	shader.setFloat("pLight[0].Kc", Kc);
-	shader.setFloat("pLight[0].Kl", Kl);
-	shader.setFloat("pLight[0].Ke", Ke);
-	shader.setVec3("pLight[1].position", pLightPos2);
-	shader.setVec3("pLight[1].color", pLightCol);
-	shader.setFloat("pLight[1].Kc", Kc);
-	shader.setFloat("pLight[1].Kl", Kl);
-	shader.setFloat("pLight[1].Ke", Ke);
-	shader.setVec3("pLight[2].position", pLightPos3);
-	shader.setVec3("pLight[2].color", pLightCol);
-	shader.setFloat("pLight[2].Kc", Kc);
-	shader.setFloat("pLight[2].Kl", Kl);
-	shader.setFloat("pLight[2].Ke", Ke);
+	cubeShader.setVec3("pLight[0].position", pLightPos);
+	cubeShader.setVec3("pLight[0].color", pLightCol);
+	cubeShader.setFloat("pLight[0].Kc", Kc);
+	cubeShader.setFloat("pLight[0].Kl", Kl);
+	cubeShader.setFloat("pLight[0].Ke", Ke);
+	cubeShader.setVec3("pLight[1].position", pLightPos2);
+	cubeShader.setVec3("pLight[1].color", pLightCol);
+	cubeShader.setFloat("pLight[1].Kc", Kc);
+	cubeShader.setFloat("pLight[1].Kl", Kl);
+	cubeShader.setFloat("pLight[1].Ke", Ke);
+	cubeShader.setVec3("pLight[2].position", pLightPos3);
+	cubeShader.setVec3("pLight[2].color", pLightCol);
+	cubeShader.setFloat("pLight[2].Kc", Kc);
+	cubeShader.setFloat("pLight[2].Kl", Kl);
+	cubeShader.setFloat("pLight[2].Ke", Ke);
 
 	//spot light
-	shader.setVec3("sLight[0].color", glm::vec3(0.1f, 0.1f, 0.1f));
-	shader.setFloat("sLight[0].kC", 1.0f);
-	shader.setFloat("sLight[0].Kl", 0.027f);
-	shader.setFloat("sLight[0].Ke", 0.0028f);
-	shader.setFloat("sLight[0].innerRad", glm::cos(glm::radians(12.5f)));
-	shader.setFloat("sLight[0].outerRad", glm::cos(glm::radians(17.5f)));
+	cubeShader.setVec3("sLight[0].color", glm::vec3(0.1f, 0.1f, 0.1f));
+	cubeShader.setFloat("sLight[0].kC", 1.0f);
+	cubeShader.setFloat("sLight[0].Kl", 0.027f);
+	cubeShader.setFloat("sLight[0].Ke", 0.0028f);
+	cubeShader.setFloat("sLight[0].innerRad", glm::cos(glm::radians(12.5f)));
+	cubeShader.setFloat("sLight[0].outerRad", glm::cos(glm::radians(17.5f)));
 
-	shader.setVec3("sLight[1].position", glm::vec3(2.5, 3.0, -3.5));
-	shader.setVec3("sLight[1].direction", glm::vec3(0.0, -1.0, 0.0));
-	shader.setVec3("sLight[1].color", glm::vec3(0.1f, 0.1f, 0.1f));
-	shader.setFloat("sLight[1].kC", 1.0f);
-	shader.setFloat("sLight[1].Kl", 0.027f);
-	shader.setFloat("sLight[1].Ke", 0.0028f);
-	shader.setFloat("sLight[1].innerRad", glm::cos(glm::radians(12.5f)));
-	shader.setFloat("sLight[1].outerRad", glm::cos(glm::radians(17.5f)));
+	cubeShader.setVec3("sLight[1].position", glm::vec3(2.5, 3.0, -3.5));
+	cubeShader.setVec3("sLight[1].direction", glm::vec3(0.0, -1.0, 0.0));
+	cubeShader.setVec3("sLight[1].color", glm::vec3(0.1f, 0.1f, 0.1f));
+	cubeShader.setFloat("sLight[1].kC", 1.0f);
+	cubeShader.setFloat("sLight[1].Kl", 0.027f);
+	cubeShader.setFloat("sLight[1].Ke", 0.0028f);
+	cubeShader.setFloat("sLight[1].innerRad", glm::cos(glm::radians(12.5f)));
+	cubeShader.setFloat("sLight[1].outerRad", glm::cos(glm::radians(17.5f)));
 
 
 	//Floor Shader

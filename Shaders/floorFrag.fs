@@ -113,7 +113,7 @@ vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light)
     vec3 diffuseColor = light.color*diffMapColor*diffuseFactor;
     diffuseColor = diffuseColor*attn;
     //specular
-    vec3 halfwayDir = normalize(viewDir - lightDir);
+    vec3 halfwayDir = normalize(viewDir - lightDir);//binn-phong
     float specularFactor = dot(viewDir, halfwayDir);
     specularFactor = max(specularFactor, 0.0);
     specularFactor = pow(specularFactor, shine);
