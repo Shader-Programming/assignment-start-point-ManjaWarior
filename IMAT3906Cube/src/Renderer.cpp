@@ -37,6 +37,8 @@ void Renderer::renderCubes(Shader& shader)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, cubeDiffuse);
 	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, cubeNormal);
+	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, cubeSpec);
 
 	glBindVertexArray(cube1.cubeVAO);  // bind and draw cube
@@ -61,6 +63,8 @@ void Renderer::renderFloor(Shader& shader)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, floorDiffuse);
 	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, floorNormal);
+	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, floorSpec);
 
 	glm::mat4 model = glm::mat4(1.0f);
@@ -75,8 +79,10 @@ void Renderer::loadTextureFiles()
 {
 	cubeDiffuse = loadTexture("..\\resources\\SampleTextures\\metalPlate\\diffuse.jpg");
 	cubeSpec = loadTexture("..\\resources\\SampleTextures\\metalPlate\\specular.jpg");
+	cubeNormal = loadTexture("..\\resources\\SampleTextures\\metalPlate\\normal.jpg");
 	floorDiffuse = loadTexture("..\\resources\\SampleTextures\\metalRust\\diffuse.jpg");
 	floorSpec = loadTexture("..\\resources\\SampleTextures\\metalRust\\specular.jpg");
+	floorNormal = loadTexture("..\\resources\\SampleTextures\\metalRust\\normal.jpg");
 }
 
 unsigned int Renderer::loadTexture(char const* path)

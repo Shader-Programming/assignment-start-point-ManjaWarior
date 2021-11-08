@@ -45,6 +45,8 @@ uniform vec3 viewPos;
 
 uniform sampler2D diffuseTexture;
 uniform sampler2D specularTexture;
+uniform sampler2D normalMap;
+uniform int map;
 
 
 float ambientFactor = 0.5f;
@@ -53,9 +55,20 @@ float specularStrength = 0.4f;
 
 void main()
 {    	
-    vec3 norm = normalize(normal);
+    //vec3 norm = normalize(normal);
     vec3 viewDir = normalize(viewPos - posWS);
     vec3 result = vec3(0.0f);
+    vec3 norm = vec3(0.0);
+    if(map == 1)
+    {
+        norm = texture(normalMap, uv).xyz;
+        norm = norm*2.0 - 1.0;
+        norm = normalize(norm);
+    }
+    else
+    {
+        norm = normalize(normal);    
+    }
 
     result = result + getDirectionalLight(norm, viewDir);
 

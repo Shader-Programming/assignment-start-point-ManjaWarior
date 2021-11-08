@@ -21,7 +21,7 @@
 // settings
 const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 900;
-
+int map;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -91,9 +91,12 @@ int main()
 		cubeShader.use();
 		cubeShader.setVec3("sLight[0].position", camera.Position);
 		cubeShader.setVec3("sLight[0].direction", (camera.Front));
+		cubeShader.setInt("map", map);
 		floorShader.use();
 		floorShader.setVec3("sLight[0].position", camera.Position);
 		floorShader.setVec3("sLight[0].direction", (camera.Front));
+		floorShader.setInt("map", map);
+
 
 		processInput(window);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -125,6 +128,11 @@ void processInput(GLFWwindow* window)
 		camera.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.ProcessKeyboard(RIGHT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+	{
+		if (map == 1) map = 0;
+		else map = 1;
+	}
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -174,7 +182,8 @@ void setUniforms(Shader& cubeShader, Shader& floorShader)
 
 	//cube textures
 	cubeShader.setInt("diffuseTexture", 0);
-	cubeShader.setInt("specularTexture", 1);
+	cubeShader.setInt("normalMap", 1);
+	cubeShader.setInt("specularTexture", 2);
 
 	//point light
 	glm::vec3 pLightPos = glm::vec3(0.0, -1.0, 1.0);
@@ -227,7 +236,8 @@ void setUniforms(Shader& cubeShader, Shader& floorShader)
 
 	//floor textures
 	floorShader.setInt("diffuseTexture", 0);
-	floorShader.setInt("specularTexture", 1);
+	floorShader.setInt("normalMap", 1);
+	floorShader.setInt("specularTexture", 2);
 
 	//point light
 	floorShader.setVec3("pLight[0].position", pLightPos);

@@ -33,6 +33,6 @@ private:
 
 	unsigned int screenW, screenH;
 
-	unsigned int cubeDiffuse, cubeSpec, floorDiffuse, floorSpec;
+	unsigned int cubeDiffuse, cubeSpec, cubeNormal, floorDiffuse, floorSpec, floorNormal;
 };
 #endif
