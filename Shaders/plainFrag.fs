@@ -46,8 +46,11 @@ uniform vec3 viewPos;
 uniform sampler2D diffuseTexture;
 uniform sampler2D specularTexture;
 uniform sampler2D normalMap;
-uniform int map;
 
+uniform int map;
+uniform bool DL;
+uniform bool PL;
+uniform bool SL;
 
 float ambientFactor = 0.5f;
 float shine = 128;
@@ -70,16 +73,25 @@ void main()
         norm = normalize(normal);    
     }
 
-    result = result + getDirectionalLight(norm, viewDir);
-
-    for(int i = 0; i < numPointLights; i++)
+    if(DL == true)
     {
-        result = result + getPointLight(norm, viewDir, pLight[i]);
+        result = result + getDirectionalLight(norm, viewDir);
     }
 
-    for(int i = 0; i < numSpotLights; i++)
+    if(PL == true)
     {
-        result = result + getSpotLight(norm, viewDir, sLight[i]);
+        for(int i = 0; i < numPointLights; i++)
+        {
+            result = result + getPointLight(norm, viewDir, pLight[i]);
+        }
+    }
+
+    if(SL == true)
+    {
+        for(int i = 0; i < numSpotLights; i++)
+        {
+            result = result + getSpotLight(norm, viewDir, sLight[i]);
+        }
     }
 
     float rimLight = 0.075*(1.0-dot(norm, viewDir));

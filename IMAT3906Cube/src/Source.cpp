@@ -39,6 +39,9 @@ float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
+//own variables
+bool DL, PL, SL;
+
 //arrays
 unsigned int floorVBO, cubeVBO, floorEBO, cubeEBO, cubeVAO, floorVAO;
 
@@ -92,10 +95,16 @@ int main()
 		cubeShader.setVec3("sLight[0].position", camera.Position);
 		cubeShader.setVec3("sLight[0].direction", (camera.Front));
 		cubeShader.setInt("map", map);
+		cubeShader.setBool("DL", DL);
+		cubeShader.setBool("PL", PL);
+		cubeShader.setBool("SL", SL);
 		floorShader.use();
 		floorShader.setVec3("sLight[0].position", camera.Position);
 		floorShader.setVec3("sLight[0].direction", (camera.Front));
 		floorShader.setInt("map", map);
+		floorShader.setBool("DL", DL);
+		floorShader.setBool("PL", PL);
+		floorShader.setBool("SL", SL);
 
 
 		processInput(window);
@@ -132,6 +141,21 @@ void processInput(GLFWwindow* window)
 	{
 		if (map == 1) map = 0;
 		else map = 1;
+	}
+	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+	{
+		if (DL == true) DL = false;
+		else DL = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+	{
+		if (PL == true) PL = false;
+		else PL = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+	{
+		if (SL == true) SL = false;
+		else SL = true;
 	}
 }
 
