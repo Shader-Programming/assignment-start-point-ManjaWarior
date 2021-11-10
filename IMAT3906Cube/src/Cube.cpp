@@ -1,4 +1,6 @@
 #include "..\include\Cube.h"
+#include "normalMapper.h"
+
 
 void Cube::createCube()
 {
@@ -62,6 +64,9 @@ void Cube::createCube()
 
 	};
 
+	normalMapper normMap;
+	normMap.calculateTanAndBitan(cubeVertices, 192, cubeIndices, 36);
+	std::vector<float> updatedCubeVertices = normMap.getUpdatedVertexData();
 
 	glm::vec3 cubeColor = glm::vec3(1.0, 0.4, 0.4);
 
@@ -72,18 +77,24 @@ void Cube::createCube()
 	glBindVertexArray(cubeVAO);
 	// fill VBO with vertex data
 	glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, updatedCubeVertices.size() * sizeof(GLfloat), updatedCubeVertices.data(), GL_STATIC_DRAW);
 	// fill EBO with index data
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeEBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cubeIndices), cubeIndices, GL_STATIC_DRAW);
 
 	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	// normal attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 	// uv attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
+	// tangent attribute
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(8 * sizeof(float)));
+	glEnableVertexAttribArray(3);
+	// bitangent attribute
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(11 * sizeof(float)));
+	glEnableVertexAttribArray(4);
 }

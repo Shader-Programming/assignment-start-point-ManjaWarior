@@ -1,4 +1,6 @@
 #include "..\include\Floor.h"
+#include "normalMapper.h"
+
 
 void Floor::createFloor()
 {
@@ -15,6 +17,10 @@ void Floor::createFloor()
 		3,1,0
 	};
 
+	normalMapper normMap;
+	normMap.calculateTanAndBitan(floorVertices, 32, floorIndices, 6); 
+	std::vector<float> updatedFloorVertices = normMap.getUpdatedVertexData();
+
 	glGenVertexArrays(1, &floorVAO);
 	glGenBuffers(1, &floorVBO);
 	glGenBuffers(1, &floorEBO);
@@ -23,18 +29,24 @@ void Floor::createFloor()
 	glm::vec3 floorColor = glm::vec3(0.1, 0.3, 0.3);
 
 	glBindBuffer(GL_ARRAY_BUFFER, floorVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(floorVertices), floorVertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, updatedFloorVertices.size() * sizeof(GLfloat), updatedFloorVertices.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, floorEBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(floorIndices), floorIndices, GL_STATIC_DRAW);
 
 	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	// normal attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 	// uv attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
+	// tangent attribute
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(8 * sizeof(float)));
+	glEnableVertexAttribArray(3);
+	// bitangent attribute
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(11 * sizeof(float)));
+	glEnableVertexAttribArray(4);
 }
