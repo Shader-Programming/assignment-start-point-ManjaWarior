@@ -5,6 +5,7 @@ out vec4 FragColor;
 in vec3 normal;
 in vec3 posWS;
 in vec2 uv;
+in mat3 TBN;
 
 struct pointLight
 {
@@ -66,7 +67,7 @@ void main()
     {
         norm = texture(normalMap, uv).xyz;
         norm = norm*2.0 - 1.0;
-        norm = normalize(norm);
+        norm = normalize(TBN*norm);
     }
     else
     {

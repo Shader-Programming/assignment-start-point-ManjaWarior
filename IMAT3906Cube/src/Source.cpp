@@ -126,7 +126,7 @@ void processInput(GLFWwindow* window)
 		camera.ProcessKeyboard(RIGHT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
 	{
-		if (map == 1) map = 0;
+		if (map == 1) map = 0;//maybe not needed anymore?
 		else map = 1;
 	}
 	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
