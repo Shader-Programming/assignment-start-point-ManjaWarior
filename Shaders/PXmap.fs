@@ -56,12 +56,17 @@ uniform pointLight pLight[numPointLights];
 #define numSpotLights 2
 uniform spotLight sLight[numSpotLights];
 
-uniform int isNM;
+uniform int NM;
 uniform float PXscale;
 uniform vec3 lightPos;
 uniform vec3 eyePos;
 uniform Material mat;
 uniform Light light;
+
+uniform int map;
+uniform bool DL;
+uniform bool PL;
+uniform bool SL;
 
 in vec3 normal; 
 in vec3 posWS;
@@ -83,11 +88,29 @@ void main()
         texCoords = ParallaxMapping(uv, viewDir);
         //texCoords = SteepParallaxMapping(uv, viewDir);
     }
-    norm = texture(mat.normalMap, texCoords).rgb;
-    norm = norm*2.0 - 1.0;
-    norm = normalize(TBN*norm;)
+    if(map == 1)
+    {
+        norm = texture(normalMap, uv).xyz;
+        norm = norm*2.0 - 1.0;
+        norm = normalize(TBN*norm);
+    }
+    else
+    {
+        norm = normalize(normal);    
+    }
 
-    result = result + getDirectionalLight(norm, viewDir, texCoords);
+    if(DL == true)
+    {
+        result = result + getDirectionalLight(norm, viewDir, texCoords);
+    }
+    if(PL == true)
+    {
+        for(int i = 0; i < numPointLights; i++)
+        {
+            result = result + getPointLight(norm, viewDir, pLight[i], texCoords);
+        }
+    }
+
     FragColor = vec4(result, 1.0f);
 }
 
@@ -121,4 +144,30 @@ vec3 getPointLight(vec3 normal, vec3 viewDir, pointLight pLight, vec2 texCoords)
     diffuse *= attenuation;
     specular *= attenuation;
     return ambient + diffuse + specular;
+}
+
+vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
+{
+    float height = texture(match.dispMap, texCoords).r;
+    return texCoords = (viewDir.xy) * (height * PXscale);
+}
+
+vec2 SteepParallaxMapping(vec2 texCoords, vec3 viewDir)
+{
+    float numLayers = 10;
+    float layerDepth = 1.0 / numLayers;
+    float currentLayerDepth = 0.0;
+    vec2 P = viewDir.xy * PXscale;
+    vec2 deltaTexCoords = P / numLayers;
+    vec2 currentTexCoords = texCoords;
+    float currentDepthMapValue = texture(mat.dispMap, currentTexCoords).r;
+
+    while(currentLayerDepth < currentDepthMapValue)
+    {
+        currentTexCoords -= deltaTexCoords;
+        currentDepthMapValue = texture(mat.dispMap, currentTexCoords).r;
+        currentLayerDepth += layerDepth;
+    }
+
+    return currentTexCoords;
 }

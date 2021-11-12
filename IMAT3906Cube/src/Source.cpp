@@ -41,7 +41,8 @@ float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
 //own variables
-bool DL, PL, SL;
+bool DL, PL, SL, NM;
+
 
 //arrays
 unsigned int floorVBO, cubeVBO, floorEBO, cubeEBO, cubeVAO, floorVAO;
@@ -82,9 +83,13 @@ int main()
 
 	// simple vertex and fragment shader 
 	Shader cubeShader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
-	Shader floorShader("..\\shaders\\plainVert.vs", "..\\shaders\\floorFrag.fs");
+	Shader floorShader("..\\shaders\\PXmap.vs", "..\\shaders\\PXmap.fs");
 
 	setUniforms(cubeShader, floorShader);
+
+	floorShader.setInt("mat.dispMap", 3);
+	floorShader.setFloat("PXscale", 0.0175);
+
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -143,6 +148,11 @@ void processInput(GLFWwindow* window)
 	{
 		if (SL == true) SL = false;
 		else SL = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+	{
+		if (NM == true) NM = false;
+		else NM = true;
 	}
 }
 
@@ -265,9 +275,9 @@ void setUniforms(Shader& cubeShader, Shader& floorShader)
 	floorShader.setVec3("lightDir", lightDirection);
 
 	//floor textures
-	floorShader.setInt("diffuseTexture", 0);
-	floorShader.setInt("normalMap", 1);
-	floorShader.setInt("specularTexture", 2);
+	floorShader.setInt("mat.diffuseTexture", 0);
+	floorShader.setInt("mat.normalMap", 1);
+	floorShader.setInt("mat.specularTexture", 2);
 
 	//point light
 	floorShader.setVec3("pLight[0].position", pLightPos);
