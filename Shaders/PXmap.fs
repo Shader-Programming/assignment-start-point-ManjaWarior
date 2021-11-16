@@ -120,7 +120,7 @@ vec3 getDirectionalLight(vec3 normal, vec3 lightDir, vec3 viewDir, vec2 texCoord
     float dif = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = dif * (texture(mat.diffuseTexture, texCoords)).rgb*light.diffuse;
     vec3 halfWay = normalize(lightDir + viewDir);
-    float spec = pow(max(dor(normal, halfWay), 0.0), mat.shininess);
+    float spec = pow(max(dot(normal, halfWay), 0.0), mat.shininess);
     vec3 specular = light.specular * spec * vec3(texture(mat.specularTexture, texCoords).r);
     return ambient + diffuse + specular;
 }
