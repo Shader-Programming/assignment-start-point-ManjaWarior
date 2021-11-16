@@ -148,7 +148,7 @@ vec3 getPointLight(vec3 normal, vec3 viewDir, pointLight pLight, vec2 texCoords)
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 {
-    float height = texture(match.dispMap, texCoords).r;
+    float height = texture(mat.dispMap, texCoords).r;
     return texCoords = (viewDir.xy) * (height * PXscale);
 }
 
