@@ -30,7 +30,7 @@ void processInput(GLFWwindow* window);
 
 //own functions
 void setUniforms(Shader& shader, Shader& shader2);
-void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera camera, bool DL, bool  PL, bool SL);
+void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera camera, bool DL, bool  PL, bool SL, int map);
 
 // camera
 Camera camera(glm::vec3(0, 0, 9));
@@ -41,8 +41,8 @@ float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
 //own variables
-bool DL, PL, SL, NM;
-
+bool PL, SL, NM;
+bool DL = true;
 
 //arrays
 unsigned int floorVBO, cubeVBO, floorEBO, cubeEBO, cubeVAO, floorVAO;
@@ -83,12 +83,12 @@ int main()
 
 	// simple vertex and fragment shader 
 	Shader cubeShader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
-	Shader floorShader("..\\shaders\\PXmap.vs", "..\\shaders\\PXmap.fs");
+	Shader floorShader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
 
 	setUniforms(cubeShader, floorShader);
 
-	floorShader.setInt("mat.dispMap", 3);
-	floorShader.setFloat("PXscale", 0.0175);
+	//floorShader.setInt("mat.dispMap", 3);
+	//floorShader.setFloat("PXscale", 0.0175);
 
 
 	while (!glfwWindowShouldClose(window))
@@ -97,7 +97,7 @@ int main()
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
-		updatePerFrameUniforms(cubeShader, floorShader, camera, DL, PL, SL);
+		updatePerFrameUniforms(cubeShader, floorShader, camera, DL, PL, SL, map);
 
 		processInput(window);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -191,7 +191,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	camera.ProcessMouseScroll(yoffset);
 }
 
-void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera camera, bool DL, bool  PL, bool SL)
+void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera camera, bool DL, bool  PL, bool SL, int map)
 {
 	cubeShader.use();
 	cubeShader.setVec3("sLight[0].position", camera.Position);
@@ -270,14 +270,17 @@ void setUniforms(Shader& cubeShader, Shader& floorShader)
 
 	//Floor Shader
 	floorShader.use();
+	float ambientFactor = 0.5f;
 	//directional light
 	floorShader.setVec3("lightCol", lightColor);
 	floorShader.setVec3("lightDir", lightDirection);
 
 	//floor textures
-	floorShader.setInt("mat.diffuseTexture", 0);
-	floorShader.setInt("mat.normalMap", 1);
-	floorShader.setInt("mat.specularTexture", 2);
+	floorShader.setInt("diffuseTexture", 0);
+	floorShader.setInt("normalMap", 1);
+	floorShader.setInt("specularTexture", 2);
+	floorShader.setInt("shininess", 128);
+	floorShader.setFloat("ambient", ambientFactor);
 
 	//point light
 	floorShader.setVec3("pLight[0].position", pLightPos);

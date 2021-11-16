@@ -66,8 +66,8 @@ void main()
     if(map == 1)
     {
         norm = texture(normalMap, uv).xyz;
-        norm = norm*2.0 - 1.0;
-        norm = normalize(TBN*norm);
+        //norm = norm*2.0 - 1.0;
+        norm = normalize(TBN*(norm*2.0 - 1.0));
     }
     else
     {
@@ -97,15 +97,15 @@ void main()
 
     float rimLight = 0.075*(1.0-dot(norm, viewDir));
     rimLight = pow(rimLight, 0.5);
-    result = result + rimLight;
+    //result = result + rimLight;
 
     FragColor = vec4(result, 1.0);
 }
 
 vec3 getDirectionalLight(vec3 norm, vec3 viewDir)
 {
-    vec3 diffMapColor = texture(diffuseTexture, uv).xyz;
-    float specMapColor = texture(specularTexture, uv).x;
+    vec3 diffMapColor = texture(diffuseTexture, uv).rgb;
+    float specMapColor = texture(specularTexture, uv).r;
     //ambient light
     vec3 ambientColor = lightCol*diffMapColor*ambientFactor;
 
@@ -119,7 +119,7 @@ vec3 getDirectionalLight(vec3 norm, vec3 viewDir)
     float specularFactor = dot(norm, halfwayDir);
     specularFactor = max(specularFactor, 0.0);
     specularFactor = pow(specularFactor, shine);
-    vec3 specularColor = lightCol * specularFactor * /*specularStrength*/ specMapColor ;
+    vec3 specularColor = lightCol * specularFactor * specMapColor ;
 
     vec3 result = ambientColor + diffuseColor + specularColor;
     return result;

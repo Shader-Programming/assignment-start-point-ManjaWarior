@@ -95,6 +95,10 @@ void main()
         }
     }
 
+    //float rimLight = 0.075*(1.0-dot(norm, viewDir));
+    //rimLight = pow(rimLight, 0.5);
+    //result = result + rimLight;
+
     FragColor = vec4(result, 1.0);
 }
 
@@ -139,7 +143,7 @@ vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light)
     vec3 diffuseColor = light.color*diffMapColor*diffuseFactor;
     diffuseColor = diffuseColor*attn;
     //specular
-    vec3 halfwayDir = normalize(viewDir - lightDir);//binn-phong
+    vec3 halfwayDir = normalize(viewDir - lightDir);
     float specularFactor = dot(viewDir, halfwayDir);
     specularFactor = max(specularFactor, 0.0);
     specularFactor = pow(specularFactor, shine);
@@ -171,7 +175,7 @@ vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light)
     specularFactor = max(specularFactor, 0.0);
     specularFactor = pow(specularFactor, shine);
     vec3 specularColor = light.color * specularFactor * specMapColor;
-    specularColor = specularColor;
+    specularColor = specularColor * attn;
 
     float theta = dot(-sLightDir, normalize(light.direction));
     float denom = (light.innerRad - light.outerRad);

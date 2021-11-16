@@ -2,11 +2,11 @@
 
 struct material
 {
-    vec3 ambient;
+    float ambient;
     sampler2D diffuseTexture;
     sampler2D specularTexture;
     sampler2D normalMap;
-    smapler2D dispMap;
+    sampler2D dispMap;
     float shininess;
 };
 
@@ -17,7 +17,7 @@ struct Light
     vec3 specular;
 };
 
-struct PointLight
+struct pointLight
 {   
     vec3 pos;
     vec3 ambient;
@@ -56,17 +56,18 @@ uniform pointLight pLight[numPointLights];
 #define numSpotLights 2
 uniform spotLight sLight[numSpotLights];
 
-uniform int NM;
 uniform float PXscale;
 uniform vec3 lightPos;
+uniform vec3 lightDir;
 uniform vec3 eyePos;
-uniform Material mat;
+uniform material mat;
 uniform Light light;
 
 uniform int map;
 uniform bool DL;
 uniform bool PL;
 uniform bool SL;
+uniform bool NM;
 
 in vec3 normal; 
 in vec3 posWS;
@@ -79,10 +80,10 @@ void main()
     vec3 norm = normalize(normal);
     vec2 texCoords = uv;
     vec3 result = vec3(0.0);
-    vec3 lightDir = normalize(-lightPos);
+    //vec3 lightDir = normalize(-lightPos);
     vec3 viewDir = normalize(eyePos - posWS);
 
-    if(isNM == 1)
+    if(NM == true)
     {
         //PX
         texCoords = ParallaxMapping(uv, viewDir);
@@ -90,7 +91,7 @@ void main()
     }
     if(map == 1)
     {
-        norm = texture(normalMap, uv).xyz;
+        norm = texture(mat.normalMap, uv).xyz;
         norm = norm*2.0 - 1.0;
         norm = normalize(TBN*norm);
     }
@@ -103,6 +104,7 @@ void main()
     {
         result = result + getDirectionalLight(norm, viewDir, texCoords);
     }
+
     if(PL == true)
     {
         for(int i = 0; i < numPointLights; i++)
@@ -111,10 +113,19 @@ void main()
         }
     }
 
+    /*if(SL == true)
+    {
+        for(int i = 0; i < numSpotLights; i++)
+        {
+            result = result + getSpotLight(norm, viewDir, sLight[i], texCoords);
+        }
+    }*/
+
+
     FragColor = vec4(result, 1.0f);
 }
 
-vec3 getDirectionalLight(vec3 normal, vec3 lightDir, vec3 viewDir, vec2 texCoords)
+vec3 getDirectionalLight(vec3 normal, vec3 viewDir, vec2 texCoords)
 {
     vec3 ambient = texture(mat.diffuseTexture, texCoords).rgb*mat.ambient*light.ambient;
     float dif = max(dot(normal, lightDir), 0.0);
@@ -129,12 +140,12 @@ vec3 getPointLight(vec3 normal, vec3 viewDir, pointLight pLight, vec2 texCoords)
 {
     vec3 lightDir = normalize(pLight.pos - posWS);
     //diffuse shading
-    float diff = max(dor(normal, lightDir), 0.0);
+    float diff = max(dot(normal, lightDir), 0.0);
     //specular shading
     vec3 halfWay = normalize(lightDir + viewDir);
-    float spec = pow(max(dor(normal, halfWay), 0.0), mat.shininess);
+    float spec = pow(max(dot(normal, halfWay), 0.0), mat.shininess);
     //attenutation
-    float distance = length(-lightDir, normal);
+    float distance = length(pLight.pos - posWS);
     float attenuation = 1.0 / (pLight.kC + pLight.kL * distance + pLight.kQ * (distance*distance));
     //combine results
     vec3 ambient = pLight.ambient * vec3(texture(mat.diffuseTexture, texCoords));
@@ -144,6 +155,40 @@ vec3 getPointLight(vec3 normal, vec3 viewDir, pointLight pLight, vec2 texCoords)
     diffuse *= attenuation;
     specular *= attenuation;
     return ambient + diffuse + specular;
+}
+
+vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light, vec2 texCoords)
+{
+
+    vec3 diffMapColor = texture(mat.diffuseTexture, texCoords).xyz;
+    float specMapColor = texture(mat.specularTexture, texCoords).x;
+
+    //spot light
+    float dist = length(light.position - posWS);
+    float attn = 1.0/(light.Kc + (light.Kl*dist) + (light.Ke*(dist*dist)));
+    vec3 sLightDir = normalize(light.position - posWS);
+    //diffuse
+    float diffuseFactor = dot(norm, sLightDir);
+    diffuseFactor = max(diffuseFactor,0.0);
+    vec3 diffuseColor = light.color*diffMapColor*diffuseFactor;
+    diffuseColor = diffuseColor * attn;
+    //specular
+    vec3 halfwayDir = normalize(viewDir - lightDir);
+    float specularFactor = dot(viewDir, halfwayDir);
+    specularFactor = max(specularFactor, 0.0);
+    specularFactor = pow(specularFactor, mat.shininess);
+    vec3 specularColor = light.color * specularFactor * specMapColor;
+    specularColor = specularColor;
+
+    float theta = dot(-sLightDir, normalize(light.direction));
+    float denom = (light.innerRad - light.outerRad);
+    float illum = (theta - light.outerRad) / denom;
+    illum = clamp(illum, 0.0,1.0);
+    diffuseColor = diffuseColor * illum;
+    specularColor = specularColor * illum;
+
+    vec3 spotLightResult = diffuseColor + specularColor;
+    return spotLightResult;
 }
 
 vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
