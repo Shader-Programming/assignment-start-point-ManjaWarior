@@ -97,7 +97,7 @@ void main()
 
     float rimLight = 0.075*(1.0-dot(norm, viewDir));
     rimLight = pow(rimLight, 0.5);
-    //result = result + rimLight;
+    result = result + rimLight;
 
     FragColor = vec4(result, 1.0);
 }

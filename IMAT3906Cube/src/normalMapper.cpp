@@ -78,11 +78,10 @@ void normalMapper::computeTanAndBitan(unsigned int* indicesData, int indLength)
 
 		c.tan = c.tan + thisTangent;
 		c.biTan = c.biTan + thisBitangent;
-
-		for (vertex& v : vertices)
-		{
-			v.tan = glm::normalize(v.tan);
-			v.biTan = glm::normalize(v.biTan);
-		}
+	}
+	for (vertex& v : vertices)
+	{
+		v.tan = glm::normalize(v.tan);
+		v.biTan = glm::normalize(v.biTan);
 	}
 }
