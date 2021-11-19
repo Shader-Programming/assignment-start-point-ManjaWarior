@@ -59,14 +59,12 @@ float specularStrength = 0.4f;
 
 void main()
 {    	
-    //vec3 norm = normalize(normal);
     vec3 viewDir = normalize(viewPos - posWS);
     vec3 result = vec3(0.0f);
     vec3 norm = vec3(0.0);
     if(map == 1)
     {
         norm = texture(normalMap, uv).xyz;
-        //norm = norm*2.0 - 1.0;
         norm = normalize(TBN*(norm*2.0 - 1.0));
     }
     else

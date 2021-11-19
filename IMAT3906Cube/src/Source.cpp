@@ -30,7 +30,7 @@ void processInput(GLFWwindow* window);
 
 //own functions
 void setUniforms(Shader& shader, Shader& shader2);
-void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera camera, bool DL, bool  PL, bool SL, int map);
+void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera camera, bool DL, bool  PL, bool SL, int map, bool NM);
 
 // camera
 Camera camera(glm::vec3(0, 0, 9));
@@ -83,12 +83,12 @@ int main()
 
 	// simple vertex and fragment shader 
 	Shader cubeShader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
-	Shader floorShader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
+	Shader floorShader("..\\shaders\\plainVert.vs", "..\\shaders\\floorFrag.fs");
 
 	setUniforms(cubeShader, floorShader);
 
-	//floorShader.setInt("mat.dispMap", 3);
-	//floorShader.setFloat("PXscale", 0.0175);
+	floorShader.setInt("dispMap", 3);
+	floorShader.setFloat("PXscale", 0.0175);
 
 
 	while (!glfwWindowShouldClose(window))
@@ -97,7 +97,7 @@ int main()
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
 
-		updatePerFrameUniforms(cubeShader, floorShader, camera, DL, PL, SL, map);
+		updatePerFrameUniforms(cubeShader, floorShader, camera, DL, PL, SL, map, NM);
 
 		processInput(window);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -191,7 +191,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	camera.ProcessMouseScroll(yoffset);
 }
 
-void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera camera, bool DL, bool  PL, bool SL, int map)
+void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera camera, bool DL, bool  PL, bool SL, int map, bool NM)
 {
 	cubeShader.use();
 	cubeShader.setVec3("sLight[0].position", camera.Position);
@@ -207,6 +207,7 @@ void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera came
 	floorShader.setBool("DL", DL);
 	floorShader.setBool("PL", PL);
 	floorShader.setBool("SL", SL);
+	floorShader.setBool("NM", NM);
 }
 
 
@@ -278,9 +279,7 @@ void setUniforms(Shader& cubeShader, Shader& floorShader)
 	//floor textures
 	floorShader.setInt("diffuseTexture", 0);
 	floorShader.setInt("normalMap", 1);
-	floorShader.setInt("specularTexture", 2);
-	floorShader.setInt("shininess", 128);
-	floorShader.setFloat("ambient", ambientFactor);
+	floorShader.setInt("specularTexture", 2); 
 
 	//point light
 	floorShader.setVec3("pLight[0].position", pLightPos);
