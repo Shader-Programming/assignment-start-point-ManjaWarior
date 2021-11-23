@@ -59,15 +59,13 @@ float specularStrength = 0.4f;
 
 void main()
 {    	
-    //vec3 norm = normalize(normal);
     vec3 viewDir = normalize(viewPos - posWS);
     vec3 result = vec3(0.0f);
     vec3 norm = vec3(0.0);
     if(map == 1)
     {
         norm = texture(normalMap, uv).xyz;
-        norm = norm*2.0 - 1.0;
-        norm = normalize(TBN*norm);
+        norm = normalize(TBN*(norm*2.0 - 1.0));
     }
     else
     {
@@ -104,8 +102,8 @@ void main()
 
 vec3 getDirectionalLight(vec3 norm, vec3 viewDir)
 {
-    vec3 diffMapColor = texture(diffuseTexture, uv).xyz;
-    float specMapColor = texture(specularTexture, uv).x;
+    vec3 diffMapColor = texture(diffuseTexture, uv).rgb;
+    float specMapColor = texture(specularTexture, uv).r;
     //ambient light
     vec3 ambientColor = lightCol*diffMapColor*ambientFactor;
 
@@ -119,7 +117,7 @@ vec3 getDirectionalLight(vec3 norm, vec3 viewDir)
     float specularFactor = dot(norm, halfwayDir);
     specularFactor = max(specularFactor, 0.0);
     specularFactor = pow(specularFactor, shine);
-    vec3 specularColor = lightCol * specularFactor * /*specularStrength*/ specMapColor ;
+    vec3 specularColor = lightCol * specularFactor * specMapColor ;
 
     vec3 result = ambientColor + diffuseColor + specularColor;
     return result;

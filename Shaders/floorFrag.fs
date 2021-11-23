@@ -29,9 +29,12 @@ struct spotLight
     float outerRad;
 };
 
-vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light);
-vec3 getDirectionalLight(vec3 norm, vec3 viewDir);
-vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light);
+vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light, vec2 texCoords);
+vec3 getDirectionalLight(vec3 norm, vec3 viewDir, vec2 texCoords);
+vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light, vec2 texCoords);
+vec2 ParallaxMapping(vec2 uv, vec3 viewDir);
+vec2 SteepParallaxMapping(vec2 uv, vec3 viewDir);
+
 
 #define numPointLights 3
 uniform pointLight pLight[numPointLights];
@@ -52,6 +55,10 @@ uniform int map;
 uniform bool DL;
 uniform bool PL;
 uniform bool SL;
+uniform bool NM;
+
+uniform sampler2D dispMap;
+uniform float PXscale;
 
 float ambientFactor = 0.5f;
 float shine = 128;
@@ -59,31 +66,37 @@ float specularStrength = 0.4f;
 
 void main()
 {    	
-    //vec3 norm = normalize(normal);
     vec3 viewDir = normalize(viewPos - posWS);
+    vec2 texCoords = uv;
     vec3 result = vec3(0.0f);
     vec3 norm = vec3(0.0);
+
     if(map == 1)
     {
-        norm = texture(normalMap, uv).xyz;
-        norm = norm*2.0 - 1.0;
-        norm = normalize(TBN*norm);
+        norm = texture(normalMap, texCoords).rgb;
+        norm = normalize(TBN*(norm*2.0 - 1.0));
     }
     else
     {
         norm = normalize(normal);    
     }
 
+    if(NM == true)
+    {
+        texCoords = ParallaxMapping(uv, viewDir);
+        //texCoords = SteepParallaxMapping(uv, viewDir);
+    }
+
     if(DL == true)
     {
-        result = result + getDirectionalLight(norm, viewDir);
+        result = result + getDirectionalLight(norm, viewDir, texCoords);
     }
 
     if(PL == true)
     {
         for(int i = 0; i < numPointLights; i++)
         {
-            result = result + getPointLight(norm, viewDir, pLight[i]);
+            result = result + getPointLight(norm, viewDir, pLight[i], texCoords);
         }
     }
 
@@ -91,17 +104,17 @@ void main()
     {
         for(int i = 0; i < numSpotLights; i++)
         {
-            result = result + getSpotLight(norm, viewDir, sLight[i]);
+            result = result + getSpotLight(norm, viewDir, sLight[i], texCoords);
         }
     }
 
     FragColor = vec4(result, 1.0);
 }
 
-vec3 getDirectionalLight(vec3 norm, vec3 viewDir)
+vec3 getDirectionalLight(vec3 norm, vec3 viewDir, vec2 texCoords)
 {
-    vec3 diffMapColor = texture(diffuseTexture, uv).xyz;
-    float specMapColor = texture(specularTexture, uv).x;
+    vec3 diffMapColor = texture(diffuseTexture, texCoords).rgb;
+    float specMapColor = texture(specularTexture, texCoords).r;
     //ambient light
     vec3 ambientColor = lightCol*diffMapColor*ambientFactor;
 
@@ -115,16 +128,16 @@ vec3 getDirectionalLight(vec3 norm, vec3 viewDir)
     float specularFactor = dot(norm, halfwayDir);
     specularFactor = max(specularFactor, 0.0);
     specularFactor = pow(specularFactor, shine);
-    vec3 specularColor = lightCol * specularFactor * /*specularStrength*/ specMapColor ;
+    vec3 specularColor = lightCol * specularFactor * specMapColor ;
 
     vec3 result = ambientColor + diffuseColor + specularColor;
     return result;
 }
 
-vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light)
+vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light, vec2 texCoords)
 {
-    vec3 diffMapColor = texture(diffuseTexture, uv).xyz;
-    float specMapColor = texture(specularTexture, uv).x;
+    vec3 diffMapColor = texture(diffuseTexture, texCoords).xyz;
+    float specMapColor = texture(specularTexture, texCoords).x;
 
     //point light
     float dist = length(light.position - posWS);
@@ -139,7 +152,7 @@ vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light)
     vec3 diffuseColor = light.color*diffMapColor*diffuseFactor;
     diffuseColor = diffuseColor*attn;
     //specular
-    vec3 halfwayDir = normalize(viewDir - lightDir);//binn-phong
+    vec3 halfwayDir = normalize(viewDir - lightDir);
     float specularFactor = dot(viewDir, halfwayDir);
     specularFactor = max(specularFactor, 0.0);
     specularFactor = pow(specularFactor, shine);
@@ -150,11 +163,11 @@ vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light)
     return pointLightResult;
 }
 
-vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light)
+vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light, vec2 texCoords)
 {
 
-    vec3 diffMapColor = texture(diffuseTexture, uv).xyz;
-    float specMapColor = texture(specularTexture, uv).x;
+    vec3 diffMapColor = texture(diffuseTexture, texCoords).xyz;
+    float specMapColor = texture(specularTexture, texCoords).x;
 
     //spot light
     float dist = length(light.position - posWS);
@@ -171,7 +184,7 @@ vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light)
     specularFactor = max(specularFactor, 0.0);
     specularFactor = pow(specularFactor, shine);
     vec3 specularColor = light.color * specularFactor * specMapColor;
-    specularColor = specularColor;
+    specularColor = specularColor * attn;
 
     float theta = dot(-sLightDir, normalize(light.direction));
     float denom = (light.innerRad - light.outerRad);
@@ -182,4 +195,10 @@ vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light)
 
     vec3 spotLightResult = diffuseColor + specularColor;
     return spotLightResult;
+}
+
+vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
+{
+    float height = texture(dispMap, texCoords).r;
+    return texCoords - (viewDir.xy) * (height * PXscale);
 }

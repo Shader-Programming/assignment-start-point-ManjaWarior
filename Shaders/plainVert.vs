@@ -2,7 +2,7 @@
 
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormals;
-layout (location = 2) in vec2 aUV;
+layout (location = 2) in vec2 texCoords;
 layout (location = 3) in vec3 aTan;
 layout (location = 4) in vec3 aBiTan;
 
@@ -26,5 +26,5 @@ void main()
     vec3 B = (model*vec4(aBiTan,0.0)).xyz;
     TBN = mat3(T, B, normal);
 
-    uv = aUV*2;
+    uv = texCoords*3.0;
 }
