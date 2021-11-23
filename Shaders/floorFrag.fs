@@ -62,7 +62,6 @@ uniform float PXscale;
 
 float ambientFactor = 0.5f;
 float shine = 128;
-float specularStrength = 0.4f;
 
 void main()
 {    	
@@ -70,6 +69,12 @@ void main()
     vec2 texCoords = uv;
     vec3 result = vec3(0.0f);
     vec3 norm = vec3(0.0);
+
+    if(NM == true)
+    {
+        //texCoords = ParallaxMapping(uv, -viewDir); //working?
+        texCoords = SteepParallaxMapping(uv, -viewDir);//working? but shouldn't need a texture map?
+    }
 
     if(map == 1)
     {
@@ -79,12 +84,6 @@ void main()
     else
     {
         norm = normalize(normal);    
-    }
-
-    if(NM == true)
-    {
-        //texCoords = ParallaxMapping(uv, viewDir); //working?
-        texCoords = SteepParallaxMapping(uv, viewDir);//working? but shouldn't need a texture map
     }
 
     if(DL == true)
@@ -128,7 +127,7 @@ vec3 getDirectionalLight(vec3 norm, vec3 viewDir, vec2 texCoords)
     float specularFactor = dot(norm, halfwayDir);
     specularFactor = max(specularFactor, 0.0);
     specularFactor = pow(specularFactor, shine);
-    vec3 specularColor = lightCol * specularFactor * specMapColor ;
+    vec3 specularColor = lightCol * specularFactor * specMapColor * 0.5f ;
 
     vec3 result = ambientColor + diffuseColor + specularColor;
     return result;
@@ -136,7 +135,7 @@ vec3 getDirectionalLight(vec3 norm, vec3 viewDir, vec2 texCoords)
 
 vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light, vec2 texCoords)
 {
-    vec3 diffMapColor = texture(diffuseTexture, texCoords).xyz;
+    vec3 diffMapColor = texture(diffuseTexture, texCoords).xyz;//should these be .rgb and .r 
     float specMapColor = texture(specularTexture, texCoords).x;
 
     //point light
@@ -156,9 +155,9 @@ vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light, vec2 texCoords)
     float specularFactor = dot(viewDir, halfwayDir);
     specularFactor = max(specularFactor, 0.0);
     specularFactor = pow(specularFactor, shine);
-    vec3 specularColor = light.color * specularFactor * specMapColor;
+    vec3 specularColor = light.color * specularFactor * specMapColor * 0.5f ;
     specularColor = specularColor * attn;
-    vec3 pointLightResult = ambientColor + diffuseColor + specularColor;
+    vec3 pointLightResult = (ambientColor + diffuseColor + specularColor) * 0.4f;
 
     return pointLightResult;
 }
@@ -183,7 +182,7 @@ vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light, vec2 texCoords)
     float specularFactor = dot(viewDir, halfwayDir);
     specularFactor = max(specularFactor, 0.0);
     specularFactor = pow(specularFactor, shine);
-    vec3 specularColor = light.color * specularFactor * specMapColor;
+    vec3 specularColor = light.color * specularFactor * specMapColor * 0.5f ;
     specularColor = specularColor * attn;
 
     float theta = dot(-sLightDir, normalize(light.direction));
@@ -205,7 +204,7 @@ vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 
 vec2 SteepParallaxMapping(vec2 texCoords, vec3 viewDir)
 {
-    float numLayers = 10;
+    float numLayers = 20;
     float layerDepth = 1.0 / numLayers;
     float currentLayerDepth = 0.0;
     vec2 P = viewDir.xy * PXscale;

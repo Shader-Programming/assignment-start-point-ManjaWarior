@@ -82,10 +82,10 @@ void Renderer::loadTextureFiles()
 	cubeDiffuse = loadTexture("..\\resources\\SampleTextures\\metalPlate\\diffuse.jpg");
 	cubeSpec = loadTexture("..\\resources\\SampleTextures\\metalPlate\\specular.jpg");
 	cubeNormal = loadTexture("..\\resources\\SampleTextures\\metalPlate\\normal.jpg");
-	floorDiffuse = loadTexture("..\\resources\\SampleTextures\\Brick\\brickDiffuse.jpg");
-	floorSpec = loadTexture("..\\resources\\SampleTextures\\Brick\\brickNormal.jpg");
-	floorNormal = loadTexture("..\\resources\\SampleTextures\\Brick\\brickNormal.jpg");
-	floorDisplacement = loadTexture("..\\resources\\SampleTextures\\Brick\\brickDisplacement.jpg");
+	floorDiffuse = loadTexture("..\\resources\\SampleTextures\\Brick\\Brick_Wall_017_SD\\brickWallDiffuse.jpg");
+	floorSpec = loadTexture("..\\resources\\SampleTextures\\Brick\\Brick_Wall_017_SD\\brickWallSpecular.jpg");
+	floorNormal = loadTexture("..\\resources\\SampleTextures\\Brick\\Brick_Wall_017_SD\\brickWallNormal.jpg");
+	floorDisplacement = loadTexture("..\\resources\\SampleTextures\\Brick\\Brick_Wall_017_SD\\brickWallDisplacement.png");
 }
 
 unsigned int Renderer::loadTexture(char const* path)

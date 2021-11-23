@@ -103,7 +103,7 @@ int main()
 		processInput(window);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);   // what happens if we change to GL_LINE?
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  
 
 		renderer.renderScene(cubeShader, floorShader, camera);
 		glfwSwapBuffers(window);
@@ -154,7 +154,6 @@ void processInput(GLFWwindow* window)
 	{
 		if (NM == true) NM = false;
 		else NM = true;
-		std::cout << NM << std::endl;
 	}
 }
 
@@ -230,7 +229,7 @@ void setUniforms(Shader& cubeShader, Shader& floorShader)
 
 	//point light
 	glm::vec3 pLightPos = glm::vec3(0.0, -1.0, 1.0);
-	glm::vec3 pLightCol = glm::vec3(5.0, 0.0, 0.0);
+	glm::vec3 pLightCol = glm::vec3(1.0, 1.0, 1.0);
 	glm::vec3 pLightPos2 = glm::vec3(-4.0, 0.0, 1.0);
 	glm::vec3 pLightPos3 = glm::vec3(4.0, 0.0, 1.0);
 	float Kc = 1.0f;
