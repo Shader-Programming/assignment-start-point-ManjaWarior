@@ -66,6 +66,8 @@ void Renderer::renderFloor(Shader& shader)
 	glBindTexture(GL_TEXTURE_2D, floorNormal);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, floorSpec);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, floorDisplacement);
 
 	glm::mat4 model = glm::mat4(1.0f);
 	shader.setMat4("model", model);
@@ -80,9 +82,10 @@ void Renderer::loadTextureFiles()
 	cubeDiffuse = loadTexture("..\\resources\\SampleTextures\\metalPlate\\diffuse.jpg");
 	cubeSpec = loadTexture("..\\resources\\SampleTextures\\metalPlate\\specular.jpg");
 	cubeNormal = loadTexture("..\\resources\\SampleTextures\\metalPlate\\normal.jpg");
-	floorDiffuse = loadTexture("..\\resources\\SampleTextures\\metalRust\\diffuse.jpg");
-	floorSpec = loadTexture("..\\resources\\SampleTextures\\metalRust\\specular.jpg");
-	floorNormal = loadTexture("..\\resources\\SampleTextures\\metalRust\\normal.jpg");
+	floorDiffuse = loadTexture("..\\resources\\SampleTextures\\Brick\\brickDiffuse.jpg");
+	floorSpec = loadTexture("..\\resources\\SampleTextures\\Brick\\brickNormal.jpg");
+	floorNormal = loadTexture("..\\resources\\SampleTextures\\Brick\\brickNormal.jpg");
+	floorDisplacement = loadTexture("..\\resources\\SampleTextures\\Brick\\brickDisplacement.jpg");
 }
 
 unsigned int Renderer::loadTexture(char const* path)
