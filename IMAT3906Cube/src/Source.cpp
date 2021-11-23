@@ -41,8 +41,9 @@ float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
 //own variables
-bool PL, SL, NM;
+bool PL, SL;
 bool DL = true;
+bool NM = true;
 
 //arrays
 unsigned int floorVBO, cubeVBO, floorEBO, cubeEBO, cubeVAO, floorVAO;
@@ -153,6 +154,7 @@ void processInput(GLFWwindow* window)
 	{
 		if (NM == true) NM = false;
 		else NM = true;
+		std::cout << NM << std::endl;
 	}
 }
 

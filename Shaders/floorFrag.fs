@@ -50,6 +50,7 @@ uniform vec3 viewPos;
 uniform sampler2D diffuseTexture;
 uniform sampler2D specularTexture;
 uniform sampler2D normalMap;
+uniform sampler2D dispMap;
 
 uniform int map;
 uniform bool DL;
@@ -57,7 +58,6 @@ uniform bool PL;
 uniform bool SL;
 uniform bool NM;
 
-uniform sampler2D dispMap;
 uniform float PXscale;
 
 float ambientFactor = 0.5f;
@@ -83,8 +83,8 @@ void main()
 
     if(NM == true)
     {
-        texCoords = ParallaxMapping(uv, viewDir);
-        //texCoords = SteepParallaxMapping(uv, viewDir);
+        //texCoords = ParallaxMapping(uv, viewDir); //working?
+        texCoords = SteepParallaxMapping(uv, viewDir);//working?
     }
 
     if(DL == true)
@@ -201,4 +201,23 @@ vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 {
     float height = texture(dispMap, texCoords).r;
     return texCoords - (viewDir.xy) * (height * PXscale);
+}
+
+vec2 SteepParallaxMapping(vec2 texCoords, vec3 viewDir)
+{
+    float numLayers = 10;
+    float layerDepth = 1.0 / numLayers;
+    float currentLayerDepth = 0.0;
+    vec2 P = viewDir.xy * PXscale;
+    vec2 deltaTexCoords = P / numLayers;
+    vec2 currentTexCoords = texCoords;
+    float currentDepthMapValue = texture(dispMap, currentTexCoords).r;
+    while(currentLayerDepth < currentDepthMapValue)
+    {
+        currentTexCoords -= deltaTexCoords;
+        currentDepthMapValue = texture(dispMap, currentTexCoords).r;
+        currentLayerDepth += layerDepth;
+    }
+
+    return currentTexCoords;
 }
