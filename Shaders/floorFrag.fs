@@ -84,7 +84,7 @@ void main()
     if(NM == true)
     {
         //texCoords = ParallaxMapping(uv, viewDir); //working?
-        texCoords = SteepParallaxMapping(uv, viewDir);//working?
+        texCoords = SteepParallaxMapping(uv, viewDir);//working? but shouldn't need a texture map
     }
 
     if(DL == true)
