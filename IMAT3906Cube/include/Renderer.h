@@ -34,7 +34,7 @@ private:
 
 	Cube cube1;
 	Floor floor1;
-	Quad quad1;
+	//Quad quad1;
 
 	unsigned int screenW, screenH;
 

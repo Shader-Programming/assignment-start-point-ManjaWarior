@@ -204,7 +204,10 @@ vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 
 vec2 SteepParallaxMapping(vec2 texCoords, vec3 viewDir)
 {
-    float numLayers = 25;
+    const float minLayers = 10.f;
+    const float maxLayers = 35.f;
+    //float numLayers = 25;
+    float numLayers = mix(maxLayers, minLayers, max(dot(vec3(0.0, 0.0, 1.0), viewDir), 0.0));//adjusts the number of layers on the view direction
     float layerDepth = 1.0 / numLayers;
     float currentLayerDepth = 0.0;
     vec2 P = viewDir.xy * PXscale;

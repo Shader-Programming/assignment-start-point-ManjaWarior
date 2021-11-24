@@ -104,15 +104,18 @@ int main()
 
 		processInput(window);
 		//1st pass to FBO
-		glBindFramebuffer(GL_FRAMEBUFFER, myFBO);
+		/*glBindFramebuffer(GL_FRAMEBUFFER, myFBO);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 		//2nd pass to render screen - QUAD VAO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glDisable(GL_DEPTH_TEST);
-		renderer.drawQuad(postProcess, colourAttachment);
+		renderer.drawQuad(postProcess, colourAttachment);*/
 
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); 
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		renderer.renderScene(cubeShader, floorShader, camera);
 		glfwSwapBuffers(window);
@@ -326,7 +329,7 @@ void setUniforms(Shader& cubeShader, Shader& floorShader)
 	floorShader.setFloat("sLight[1].outerRad", glm::cos(glm::radians(17.5f)));
 }
 
-void setFBOColour()
+/*void setFBOColour()
 {
 	glGenFramebuffers(1, &myFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, myFBO);
@@ -337,6 +340,6 @@ void setFBOColour()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourAttachment, 0);
-}
+}*/
 
 

@@ -4,7 +4,7 @@ Renderer::Renderer(unsigned int sW, unsigned int sH)
 {
 	cube1.createCube();
 	floor1.createFloor();
-	quad1.createQuad();
+	//quad1.createQuad();
 	loadTextureFiles();
 	screenW = sW;
 	screenH = sH;
@@ -83,7 +83,7 @@ void Renderer::drawQuad(Shader& shader, unsigned int& textureObj)
 	shader.use();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureObj);
-	glBindVertexArray(quad1.quadVAO);
+	//glBindVertexArray(quad1.quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
 }
