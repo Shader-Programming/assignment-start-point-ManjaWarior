@@ -221,5 +221,16 @@ vec2 SteepParallaxMapping(vec2 texCoords, vec3 viewDir)
         currentLayerDepth += layerDepth;
     }
 
-    return currentTexCoords;
+    //parallax occlusion mapping below here
+    //get tex coords before collision
+    vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
+    //get depth after and before collision for interpolation
+    float afterDepth = currentDepthMapValue - currentLayerDepth;
+    float beforeDepth = texture(dispMap, prevTexCoords).r - currentLayerDepth + layerDepth;
+    //interpolation of texture coords
+    float weight = afterDepth / (afterDepth - beforeDepth);
+    vec2 finalTexCoords = prevTexCoords *weight + currentTexCoords * (1.0 - weight);
+
+    return finalTexCoords;
+    //return currentTexCoords;
 }
