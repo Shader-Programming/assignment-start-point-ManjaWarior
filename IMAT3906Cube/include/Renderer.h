@@ -14,12 +14,16 @@
 #include "Camera.h"
 #include "Cube.h"
 #include "Floor.h"
+#include "Quad.h"
 
 class Renderer
 {
 public:
 	Renderer(unsigned int sW, unsigned int sH);
 	void renderScene(Shader& shader, Shader& floorShader, Camera& cam);
+
+	void drawQuad(Shader& shader, unsigned int& textureObj);
+
 
 private:
 	void renderCubes(Shader& shader);
@@ -30,6 +34,7 @@ private:
 
 	Cube cube1;
 	Floor floor1;
+	//Quad quad1;
 
 	unsigned int screenW, screenH;
 

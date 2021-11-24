@@ -55,7 +55,7 @@ uniform bool SL;
 
 float ambientFactor = 0.5f;
 float shine = 128;
-float specularStrength = 0.4f;
+float specularStrength = 0.3f;
 
 void main()
 {    	

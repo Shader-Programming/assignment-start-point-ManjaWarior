@@ -4,6 +4,7 @@ Renderer::Renderer(unsigned int sW, unsigned int sH)
 {
 	cube1.createCube();
 	floor1.createFloor();
+	//quad1.createQuad();
 	loadTextureFiles();
 	screenW = sW;
 	screenH = sH;
@@ -77,15 +78,25 @@ void Renderer::renderFloor(Shader& shader)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
+void Renderer::drawQuad(Shader& shader, unsigned int& textureObj)
+{
+	shader.use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textureObj);
+	//glBindVertexArray(quad1.quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+}
+
 void Renderer::loadTextureFiles()
 {
 	cubeDiffuse = loadTexture("..\\resources\\SampleTextures\\metalPlate\\diffuse.jpg");
 	cubeSpec = loadTexture("..\\resources\\SampleTextures\\metalPlate\\specular.jpg");
 	cubeNormal = loadTexture("..\\resources\\SampleTextures\\metalPlate\\normal.jpg");
-	floorDiffuse = loadTexture("..\\resources\\SampleTextures\\Brick\\brickDiffuse.jpg");
-	floorSpec = loadTexture("..\\resources\\SampleTextures\\Brick\\brickNormal.jpg");
-	floorNormal = loadTexture("..\\resources\\SampleTextures\\Brick\\brickNormal.jpg");
-	floorDisplacement = loadTexture("..\\resources\\SampleTextures\\Brick\\brickDisplacement.jpg");
+	floorDiffuse = loadTexture("..\\resources\\SampleTextures\\Brick\\Brick_Wall_017_SD\\brickWallDiffuse.jpg");
+	floorSpec = loadTexture("..\\resources\\SampleTextures\\Brick\\Brick_Wall_017_SD\\brickWallSpecular.jpg");
+	floorNormal = loadTexture("..\\resources\\SampleTextures\\Brick\\Brick_Wall_017_SD\\brickWallNormal.jpg");
+	floorDisplacement = loadTexture("..\\resources\\SampleTextures\\Brick\\Brick_Wall_017_SD\\brickWallDisplacement.png");
 }
 
 unsigned int Renderer::loadTexture(char const* path)

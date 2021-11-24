@@ -31,6 +31,7 @@ void processInput(GLFWwindow* window);
 //own functions
 void setUniforms(Shader& shader, Shader& shader2);
 void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera camera, bool DL, bool  PL, bool SL, int map, bool NM);
+void setFBOColour();
 
 // camera
 Camera camera(glm::vec3(0, 0, 9));
@@ -85,6 +86,7 @@ int main()
 	// simple vertex and fragment shader 
 	Shader cubeShader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
 	Shader floorShader("..\\shaders\\plainVert.vs", "..\\shaders\\floorFrag.fs");
+	Shader postProcess("..\\shaders\\PP.vs", "..\\shaders\\PP.fs");
 
 	setUniforms(cubeShader, floorShader);
 
@@ -101,9 +103,19 @@ int main()
 		updatePerFrameUniforms(cubeShader, floorShader, camera, DL, PL, SL, map, NM);
 
 		processInput(window);
+		//1st pass to FBO
+		/*glBindFramebuffer(GL_FRAMEBUFFER, myFBO);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_DEPTH_TEST);
+		//2nd pass to render screen - QUAD VAO
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glDisable(GL_DEPTH_TEST);
+		renderer.drawQuad(postProcess, colourAttachment);*/
+
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);   // what happens if we change to GL_LINE?
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		renderer.renderScene(cubeShader, floorShader, camera);
 		glfwSwapBuffers(window);
@@ -154,7 +166,6 @@ void processInput(GLFWwindow* window)
 	{
 		if (NM == true) NM = false;
 		else NM = true;
-		std::cout << NM << std::endl;
 	}
 }
 
@@ -230,7 +241,7 @@ void setUniforms(Shader& cubeShader, Shader& floorShader)
 
 	//point light
 	glm::vec3 pLightPos = glm::vec3(0.0, -1.0, 1.0);
-	glm::vec3 pLightCol = glm::vec3(5.0, 0.0, 0.0);
+	glm::vec3 pLightCol = glm::vec3(1.0, 1.0, 1.0);
 	glm::vec3 pLightPos2 = glm::vec3(-4.0, 0.0, 1.0);
 	glm::vec3 pLightPos3 = glm::vec3(4.0, 0.0, 1.0);
 	float Kc = 1.0f;
@@ -318,6 +329,17 @@ void setUniforms(Shader& cubeShader, Shader& floorShader)
 	floorShader.setFloat("sLight[1].outerRad", glm::cos(glm::radians(17.5f)));
 }
 
+/*void setFBOColour()
+{
+	glGenFramebuffers(1, &myFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, myFBO);
+	glGenTextures(1, &colourAttachment);
+	glBindTexture(GL_TEXTURE_2D, colourAttachment);
 
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourAttachment, 0);
+}*/
 
 
