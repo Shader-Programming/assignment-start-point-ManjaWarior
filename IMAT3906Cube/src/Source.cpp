@@ -45,6 +45,7 @@ bool firstMouse = true;
 bool PL, SL;
 bool DL = true;
 bool NM = true;
+unsigned int myFBO, colourAttachment;
 
 //arrays
 unsigned int floorVBO, cubeVBO, floorEBO, cubeEBO, cubeVAO, floorVAO;
@@ -85,14 +86,11 @@ int main()
 
 	// simple vertex and fragment shader 
 	Shader cubeShader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
-	Shader floorShader("..\\shaders\\plainVert.vs", "..\\shaders\\floorFrag.fs");
+	Shader floorShader("..\\shaders\\floorVert.vs", "..\\shaders\\floorFrag.fs");
 	Shader postProcess("..\\shaders\\PP.vs", "..\\shaders\\PP.fs");
 
 	setUniforms(cubeShader, floorShader);
-
-	floorShader.setInt("dispMap", 3);
-	floorShader.setFloat("PXscale", 0.0175);
-
+	setFBOColour();
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -107,14 +105,15 @@ int main()
 		glBindFramebuffer(GL_FRAMEBUFFER, myFBO);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
+		renderer.renderScene(cubeShader, floorShader, camera);
+
 		//2nd pass to render screen - QUAD VAO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glDisable(GL_DEPTH_TEST);
 		renderer.drawQuad(postProcess, colourAttachment);
 
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);  
+		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		renderer.renderScene(cubeShader, floorShader, camera);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
@@ -290,6 +289,8 @@ void setUniforms(Shader& cubeShader, Shader& floorShader)
 	floorShader.setInt("diffuseTexture", 0);
 	floorShader.setInt("normalMap", 1);
 	floorShader.setInt("specularTexture", 2); 
+	floorShader.setInt("dispMap", 3);
+	floorShader.setFloat("PXscale", 0.0175);
 
 	//point light
 	floorShader.setVec3("pLight[0].position", pLightPos);

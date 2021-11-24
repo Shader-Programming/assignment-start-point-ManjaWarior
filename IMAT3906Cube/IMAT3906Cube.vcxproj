@@ -164,6 +164,27 @@
     <ClCompile Include="src\Source.cpp" />
     <ClCompile Include="src\stb_image.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Debug\IMAT3906Cube.exe.recipe" />
+    <None Include="Debug\IMAT3906Cube.ilk" />
+    <None Include="Debug\vc142.idb" />
+    <None Include="Debug\vc142.pdb" />
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="Debug\Camera.obj" />
+    <Object Include="Debug\Cube.obj" />
+    <Object Include="Debug\Floor.obj" />
+    <Object Include="Debug\glad.obj" />
+    <Object Include="Debug\normalMapper.obj" />
+    <Object Include="Debug\Quad.obj" />
+    <Object Include="Debug\Renderer.obj" />
+    <Object Include="Debug\Shader.obj" />
+    <Object Include="Debug\Source.obj" />
+    <Object Include="Debug\stb_image.obj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Debug\IMAT3906Cube.log" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

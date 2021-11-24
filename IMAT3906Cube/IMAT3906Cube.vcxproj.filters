@@ -72,4 +72,25 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Debug\vc142.pdb" />
+    <None Include="Debug\vc142.idb" />
+    <None Include="Debug\IMAT3906Cube.ilk" />
+    <None Include="Debug\IMAT3906Cube.exe.recipe" />
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="Debug\stb_image.obj" />
+    <Object Include="Debug\Source.obj" />
+    <Object Include="Debug\Shader.obj" />
+    <Object Include="Debug\Renderer.obj" />
+    <Object Include="Debug\Quad.obj" />
+    <Object Include="Debug\normalMapper.obj" />
+    <Object Include="Debug\glad.obj" />
+    <Object Include="Debug\Cube.obj" />
+    <Object Include="Debug\Floor.obj" />
+    <Object Include="Debug\Camera.obj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Debug\IMAT3906Cube.log" />
+  </ItemGroup>
 </Project>
