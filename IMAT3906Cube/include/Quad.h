@@ -9,9 +9,9 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-class Cube
+class Quad
 {
 public:
-	void createCube();
-	unsigned int cubeVAO, cubeVBO, cubeEBO;
+	void createQuad();
+	unsigned int quadVAO, quadVBO, quadEBO;
 };

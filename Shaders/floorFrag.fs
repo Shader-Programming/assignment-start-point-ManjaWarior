@@ -204,7 +204,7 @@ vec2 ParallaxMapping(vec2 texCoords, vec3 viewDir)
 
 vec2 SteepParallaxMapping(vec2 texCoords, vec3 viewDir)
 {
-    float numLayers = 20;
+    float numLayers = 25;
     float layerDepth = 1.0 / numLayers;
     float currentLayerDepth = 0.0;
     vec2 P = viewDir.xy * PXscale;
