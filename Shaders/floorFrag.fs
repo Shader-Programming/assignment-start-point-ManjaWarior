@@ -72,8 +72,8 @@ void main()
 
     if(NM == true)
     {
-        //texCoords = ParallaxMapping(uv, -viewDir); //working?
-        texCoords = SteepParallaxMapping(uv, -viewDir);//working? but shouldn't need a texture map?
+        //texCoords = ParallaxMapping(uv, -viewDir);
+        texCoords = SteepParallaxMapping(uv, -viewDir);
     }
 
     if(map == 1)
@@ -135,7 +135,7 @@ vec3 getDirectionalLight(vec3 norm, vec3 viewDir, vec2 texCoords)
 
 vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light, vec2 texCoords)
 {
-    vec3 diffMapColor = texture(diffuseTexture, texCoords).xyz;//should these be .rgb and .r 
+    vec3 diffMapColor = texture(diffuseTexture, texCoords).xyz; 
     float specMapColor = texture(specularTexture, texCoords).x;
 
     //point light
@@ -221,6 +221,8 @@ vec2 SteepParallaxMapping(vec2 texCoords, vec3 viewDir)
         currentLayerDepth += layerDepth;
     }
 
+    //return currentTexCoords;
+
     //parallax occlusion mapping below here
     //get tex coords before collision
     vec2 prevTexCoords = currentTexCoords + deltaTexCoords;
@@ -232,5 +234,4 @@ vec2 SteepParallaxMapping(vec2 texCoords, vec3 viewDir)
     vec2 finalTexCoords = prevTexCoords *weight + currentTexCoords * (1.0 - weight);
 
     return finalTexCoords;
-    //return currentTexCoords;
 }

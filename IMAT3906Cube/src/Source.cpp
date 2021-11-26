@@ -29,7 +29,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 
 //own functions
-void setUniforms(Shader& shader, Shader& shader2);
+void setUniforms(Shader& shader, Shader& shader2, Shader& shader3);
 void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera camera, bool DL, bool  PL, bool SL, int map, bool NM);
 void setFBOColour();
 
@@ -84,12 +84,13 @@ int main()
 	//Renderer
 	Renderer renderer(SCR_WIDTH, SCR_HEIGHT);
 
-	// simple vertex and fragment shader 
+	// simple vertex and fragment shader and post processing
 	Shader cubeShader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
 	Shader floorShader("..\\shaders\\floorVert.vs", "..\\shaders\\floorFrag.fs");
 	Shader postProcess("..\\shaders\\PP.vs", "..\\shaders\\PP.fs");
 
-	setUniforms(cubeShader, floorShader);
+	setUniforms(cubeShader, floorShader, postProcess);
+
 	setFBOColour();
 
 	while (!glfwWindowShouldClose(window))
@@ -108,9 +109,9 @@ int main()
 		renderer.renderScene(cubeShader, floorShader, camera);
 
 		//2nd pass to render screen - QUAD VAO
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);//default FBO
 		glDisable(GL_DEPTH_TEST);
-		renderer.drawQuad(postProcess, colourAttachment);
+		renderer.drawQuad(postProcess, colourAttachment);//maybe something wrong with the quad?
 
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -220,7 +221,7 @@ void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera came
 }
 
 
-void setUniforms(Shader& cubeShader, Shader& floorShader)
+void setUniforms(Shader& cubeShader, Shader& floorShader, Shader& postProcess)
 {
 	cubeShader.use();
 	//directional light
@@ -325,6 +326,9 @@ void setUniforms(Shader& cubeShader, Shader& floorShader)
 	floorShader.setFloat("sLight[1].Ke", 0.0028f);
 	floorShader.setFloat("sLight[1].innerRad", glm::cos(glm::radians(12.5f)));
 	floorShader.setFloat("sLight[1].outerRad", glm::cos(glm::radians(17.5f)));
+
+	//postProcess.use();
+	//postProcess.setInt("image", 0);
 }
 
 void setFBOColour()
@@ -338,6 +342,15 @@ void setFBOColour()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourAttachment, 0);
+
+	unsigned int rbo;
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+	//check if it is complete
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 }
 
 

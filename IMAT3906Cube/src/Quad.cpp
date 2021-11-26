@@ -12,7 +12,7 @@ void Quad::createQuad()
 	//setup plane VAO
 	glGenVertexArrays(1, &quadVAO);
 	glGenBuffers(1, &quadVBO);
-	glBindVertexArray(quadVBO);
+	glBindVertexArray(quadVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);

@@ -13,5 +13,5 @@ class Quad
 {
 public:
 	void createQuad();
-	unsigned int quadVAO, quadVBO, quadEBO;
+	unsigned int quadVAO, quadVBO;
 };
