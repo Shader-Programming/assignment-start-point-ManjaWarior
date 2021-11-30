@@ -50,8 +50,6 @@ unsigned int myFBO, colourAttachment;
 //arrays
 unsigned int floorVBO, cubeVBO, floorEBO, cubeEBO, cubeVAO, floorVAO;
 
-unsigned int testImage;
-
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -93,8 +91,6 @@ int main()
 
 	setUniforms(cubeShader, floorShader, postProcess);
 
-	testImage = renderer.loadTexture("H:\\Documents\\Shaders\\Resources\\SampleTextures\\metalRust\\normal.jpg");
-
 	setFBOColour();
 
 	while (!glfwWindowShouldClose(window))
@@ -107,7 +103,7 @@ int main()
 
 		processInput(window);
 		//1st pass to FBO
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, myFBO);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 		renderer.renderScene(cubeShader, floorShader, camera);
@@ -115,7 +111,7 @@ int main()
 		//2nd pass to render screen - QUAD VAO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);//default FBO
 		glDisable(GL_DEPTH_TEST);
-		renderer.drawQuad(postProcess, testImage);//maybe something wrong with the quad? Changed to having flashes of colour when quad fixed
+		renderer.drawQuad(postProcess, colourAttachment);//real dark
 
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
