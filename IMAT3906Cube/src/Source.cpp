@@ -111,7 +111,7 @@ int main()
 		//2nd pass to render screen - QUAD VAO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);//default FBO
 		glDisable(GL_DEPTH_TEST);
-		renderer.drawQuad(postProcess, colourAttachment);//real dark
+		renderer.drawQuad(postProcess, colourAttachment);
 
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
