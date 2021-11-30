@@ -23,7 +23,6 @@ public:
 	void renderScene(Shader& shader, Shader& floorShader, Camera& cam);
 
 	void drawQuad(Shader& shader, unsigned int& textureObj);
-	unsigned int loadTexture(char const* path);
 
 
 
@@ -31,6 +30,7 @@ private:
 	void renderCubes(Shader& shader);
 	void renderFloor(Shader& shader);
 
+	unsigned int loadTexture(char const* path);
 	void loadTextureFiles();
 
 	Cube cube1;
