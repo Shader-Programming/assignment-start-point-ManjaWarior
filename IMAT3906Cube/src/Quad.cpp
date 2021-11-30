@@ -7,7 +7,7 @@ void Quad::createQuad()
 		-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
 		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
 		1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-		1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		1.0f, -1.0f, 0.0f, 1.0f, 0.0f
 	};
 	//setup plane VAO
 	glGenVertexArrays(1, &quadVAO);
