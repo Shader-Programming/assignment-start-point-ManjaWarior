@@ -111,7 +111,7 @@ int main()
 		//2nd pass to render screen - QUAD VAO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);//default FBO
 		glDisable(GL_DEPTH_TEST);
-		renderer.drawQuad(postProcess, colourAttachment);//maybe something wrong with the quad?
+		renderer.drawQuad(postProcess, colourAttachment);//maybe something wrong with the quad? Changed to having flashes of colour when quad fixed
 
 		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
