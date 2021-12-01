@@ -29,9 +29,11 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 
 //own functions
-void setUniforms(Shader& shader, Shader& shader2, Shader& shader3);
+void setUniforms(Shader& shader, Shader& shader2);
 void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera camera, bool DL, bool  PL, bool SL, int map, bool NM);
 void setFBOColour();
+void setFBODepth();
+void setFBOColourAndDepth();
 
 // camera
 Camera camera(glm::vec3(0, 0, 9));
@@ -45,7 +47,8 @@ bool firstMouse = true;
 bool PL, SL;
 bool DL = true;
 bool NM = true;
-unsigned int myFBO, colourAttachment;
+unsigned int myFBO, myFBODepth, depthAttachment;
+unsigned int colourAttachment[3];
 
 //arrays
 unsigned int floorVBO, cubeVBO, floorEBO, cubeEBO, cubeVAO, floorVAO;
@@ -88,10 +91,17 @@ int main()
 	Shader cubeShader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
 	Shader floorShader("..\\shaders\\floorVert.vs", "..\\shaders\\floorFrag.fs");
 	Shader postProcess("..\\shaders\\PP.vs", "..\\shaders\\PP.fs");
+	Shader depthPostProcess("..\\shaders\\PP.vs", "..\\shaders\\dPP.fs");
 
-	setUniforms(cubeShader, floorShader, postProcess);
+	setUniforms(cubeShader, floorShader);
+	postProcess.use();
+	postProcess.setInt("image", 0);
+	depthPostProcess.use();
+	depthPostProcess.setInt("image", 0);
 
-	setFBOColour();
+	//setFBOColour();
+	//setFBODepth();
+	setFBOColourAndDepth();
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -107,13 +117,10 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 		renderer.renderScene(cubeShader, floorShader, camera);
-
-		//2nd pass to render screen - QUAD VAO
+		//3rd pass to render screen - QUAD VAO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);//default FBO
 		glDisable(GL_DEPTH_TEST);
-		renderer.drawQuad(postProcess, colourAttachment);
-
-		//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		renderer.drawQuad(postProcess, colourAttachment[0]);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -221,8 +228,9 @@ void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera came
 }
 
 
-void setUniforms(Shader& cubeShader, Shader& floorShader, Shader& postProcess)
+void setUniforms(Shader& cubeShader, Shader& floorShader)
 {
+	float bloomMinBrightness = 0.5f;
 	cubeShader.use();
 	//directional light
 	glm::vec3 lightDirection = glm::vec3(0, -1, 0);
@@ -230,6 +238,7 @@ void setUniforms(Shader& cubeShader, Shader& floorShader, Shader& postProcess)
 
 	cubeShader.setVec3("lightCol", lightColor);
 	cubeShader.setVec3("lightDir", lightDirection);
+	cubeShader.setFloat("bloomBrightness", bloomMinBrightness);
 
 	//cube textures
 	cubeShader.setInt("diffuseTexture", 0);
@@ -283,6 +292,7 @@ void setUniforms(Shader& cubeShader, Shader& floorShader, Shader& postProcess)
 	floorShader.use();
 	float ambientFactor = 0.5f;
 	//directional light
+	floorShader.setFloat("bloomBrightness", bloomMinBrightness);
 	floorShader.setVec3("lightCol", lightColor);
 	floorShader.setVec3("lightDir", lightDirection);
 
@@ -326,22 +336,19 @@ void setUniforms(Shader& cubeShader, Shader& floorShader, Shader& postProcess)
 	floorShader.setFloat("sLight[1].Ke", 0.0028f);
 	floorShader.setFloat("sLight[1].innerRad", glm::cos(glm::radians(12.5f)));
 	floorShader.setFloat("sLight[1].outerRad", glm::cos(glm::radians(17.5f)));
-
-	//postProcess.use();
-	//postProcess.setInt("image", 0);
 }
 
 void setFBOColour()
 {
 	glGenFramebuffers(1, &myFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, myFBO);
-	glGenTextures(1, &colourAttachment);
-	glBindTexture(GL_TEXTURE_2D, colourAttachment);
+	glGenTextures(1, &colourAttachment[0]);
+	glBindTexture(GL_TEXTURE_2D, colourAttachment[0]);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourAttachment, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colourAttachment[0], 0);
 
 	unsigned int rbo;
 	glGenRenderbuffers(1, &rbo);
@@ -353,4 +360,51 @@ void setFBOColour()
 		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
 }
 
+void setFBODepth()
+{
+	glGenFramebuffers(1, &myFBODepth);
+	glBindFramebuffer(GL_FRAMEBUFFER, myFBODepth);
+	glGenTextures(1, &depthAttachment);
+	glBindTexture(GL_TEXTURE_2D, depthAttachment);
 
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthAttachment, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void setFBOColourAndDepth()
+{
+	glGenFramebuffers(1, &myFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, myFBO);
+	glGenTextures(2, colourAttachment);
+	//colour
+	for (int i = 0; i < 3; i++)
+	{
+		glBindTexture(GL_TEXTURE_2D, colourAttachment[i]);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colourAttachment[i], 0);
+	}
+	//depth
+	glGenTextures(1, &depthAttachment);
+	glBindTexture(GL_TEXTURE_2D, depthAttachment);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthAttachment, 0);
+
+	unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+	glDrawBuffers(2, attachments);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}

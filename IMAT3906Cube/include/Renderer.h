@@ -24,8 +24,6 @@ public:
 
 	void drawQuad(Shader& shader, unsigned int& textureObj);
 
-
-
 private:
 	void renderCubes(Shader& shader);
 	void renderFloor(Shader& shader);

@@ -1,6 +1,7 @@
 #version 410 core
 
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 brightColor;
 
 in vec3 normal;
 in vec3 posWS;
@@ -60,6 +61,8 @@ uniform bool NM;
 
 uniform float PXscale;
 
+uniform float bloomBrightness;
+
 float ambientFactor = 0.5f;
 float shine = 128;
 
@@ -108,6 +111,13 @@ void main()
     }
 
     FragColor = vec4(result, 1.0);
+
+    //brightness calculations
+    float brightness = max(max(result.x, result.y), result.z);
+    if(brightness > bloomBrightness)
+        brightColor = FragColor;
+    else
+        brightColor = vec4(vec3(0.0), 1.0);
 }
 
 vec3 getDirectionalLight(vec3 norm, vec3 viewDir, vec2 texCoords)
