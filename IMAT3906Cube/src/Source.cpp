@@ -48,6 +48,7 @@ bool PL, SL;
 bool DL = true;
 bool NM = true;
 unsigned int myFBO, myFBODepth, depthAttachment;
+unsigned int FBOBlur, blurredTexture;
 unsigned int colourAttachment[3];
 
 //arrays
@@ -92,6 +93,7 @@ int main()
 	Shader floorShader("..\\shaders\\floorVert.vs", "..\\shaders\\floorFrag.fs");
 	Shader postProcess("..\\shaders\\PP.vs", "..\\shaders\\PP.fs");
 	Shader depthPostProcess("..\\shaders\\PP.vs", "..\\shaders\\dPP.fs");
+	Shader blurShader("..\\shaders\\PP.vs", "..\\shaders\\blur.fs");
 
 	setUniforms(cubeShader, floorShader);
 	postProcess.use();
@@ -117,10 +119,22 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 		renderer.renderScene(cubeShader, floorShader, camera);
+
+		//blur colour attachmet
+		glBindFramebuffer(GL_FRAMEBUFFER, FBOBlur);
+		glDisable(GL_DEPTH_TEST);
+		blurShader.use();
+		blurShader.setInt("horz", 1);
+		renderer.drawQuad(blurShader, colourAttachment[0]);
+		blurShader.setInt("horz", 0);
+		renderer.drawQuad(blurShader, blurredTexture);
+
 		//3rd pass to render screen - QUAD VAO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);//default FBO
 		glDisable(GL_DEPTH_TEST);
 		renderer.drawQuad(postProcess, colourAttachment[0]);
+		if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
+			renderer.drawQuad(postProcess, blurredTexture);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -146,27 +160,27 @@ void processInput(GLFWwindow* window)
 		camera.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.ProcessKeyboard(RIGHT, deltaTime);
-	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)//normal map
 	{
-		if (map == 1) map = 0;//maybe not needed anymore?
+		if (map == 1) map = 0;
 		else map = 1;
 	}
-	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)//directional light
 	{
 		if (DL == true) DL = false;
 		else DL = true;
 	}
-	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)//point light
 	{
 		if (PL == true) PL = false;
 		else PL = true;
 	}
-	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)//spot light
 	{
 		if (SL == true) SL = false;
 		else SL = true;
 	}
-	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)//parallax map
 	{
 		if (NM == true) NM = false;
 		else NM = true;
@@ -226,7 +240,6 @@ void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera came
 	floorShader.setBool("SL", SL);
 	floorShader.setBool("NM", NM);
 }
-
 
 void setUniforms(Shader& cubeShader, Shader& floorShader)
 {
