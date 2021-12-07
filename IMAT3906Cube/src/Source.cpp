@@ -34,6 +34,7 @@ void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera came
 void setFBOColour();
 void setFBODepth();
 void setFBOColourAndDepth();
+void setFBOBlur();
 
 // camera
 Camera camera(glm::vec3(0, 0, 9));
@@ -96,14 +97,11 @@ int main()
 	Shader blurShader("..\\shaders\\PP.vs", "..\\shaders\\blur.fs");
 
 	setUniforms(cubeShader, floorShader);
-	postProcess.use();
-	postProcess.setInt("image", 0);
-	depthPostProcess.use();
-	depthPostProcess.setInt("image", 0);
 
 	//setFBOColour();
 	//setFBODepth();
 	setFBOColourAndDepth();
+	setFBOBlur();
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -180,7 +178,7 @@ void processInput(GLFWwindow* window)
 		if (SL == true) SL = false;
 		else SL = true;
 	}
-	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)//parallax map
+	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)//parallax mapping
 	{
 		if (NM == true) NM = false;
 		else NM = true;
@@ -420,4 +418,16 @@ void setFBOColourAndDepth()
 	glDrawBuffers(2, attachments);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+void setFBOBlur()
+{
+	glGenFramebuffers(1, &FBOBlur);
+	glBindFramebuffer(GL_FRAMEBUFFER, FBOBlur);
+	glGenTextures(1, &blurredTexture);
+	glBindTexture(GL_TEXTURE_2D, blurredTexture);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, blurredTexture, 0);
 }
