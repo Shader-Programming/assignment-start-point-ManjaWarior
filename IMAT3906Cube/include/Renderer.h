@@ -23,6 +23,7 @@ public:
 	void renderScene(Shader& shader, Shader& floorShader, Camera& cam);
 
 	void drawQuad(Shader& shader, unsigned int& textureObj);
+	void drawQuad(Shader& shader, unsigned int& textureObj, unsigned int textureObj2);
 
 private:
 	void renderCubes(Shader& shader);

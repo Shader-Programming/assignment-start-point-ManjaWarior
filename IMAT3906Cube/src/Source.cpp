@@ -95,11 +95,10 @@ int main()
 	Shader postProcess("..\\shaders\\PP.vs", "..\\shaders\\PP.fs");
 	Shader depthPostProcess("..\\shaders\\PP.vs", "..\\shaders\\dPP.fs");
 	Shader blurShader("..\\shaders\\PP.vs", "..\\shaders\\blur.fs");
+	Shader bloomShader("..\\shaders\\PP.vs", "..\\shaders\\BloomShader.fs");
 
 	setUniforms(cubeShader, floorShader);
 
-	//setFBOColour();
-	//setFBODepth();
 	setFBOColourAndDepth();
 	setFBOBlur();
 
@@ -123,14 +122,15 @@ int main()
 		glDisable(GL_DEPTH_TEST);
 		blurShader.use();
 		blurShader.setInt("horz", 1);
-		renderer.drawQuad(blurShader, colourAttachment[0]);
+		renderer.drawQuad(blurShader, colourAttachment[1]);
 		blurShader.setInt("horz", 0);
 		renderer.drawQuad(blurShader, blurredTexture);
 
 		//3rd pass to render screen - QUAD VAO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);//default FBO
 		glDisable(GL_DEPTH_TEST);
-		renderer.drawQuad(postProcess, colourAttachment[0]);
+		//renderer.drawQuad(postProcess, colourAttachment[0]);
+		renderer.drawQuad(bloomShader, colourAttachment[0], blurredTexture);//should apply bloom to the normal window
 		if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
 			renderer.drawQuad(postProcess, blurredTexture);
 
@@ -241,7 +241,7 @@ void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera came
 
 void setUniforms(Shader& cubeShader, Shader& floorShader)
 {
-	float bloomMinBrightness = 0.5f;
+	float bloomMinBrightness = 0.85f;
 	cubeShader.use();
 	//directional light
 	glm::vec3 lightDirection = glm::vec3(0, -1, 0);
@@ -419,6 +419,7 @@ void setFBOColourAndDepth()
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
+
 void setFBOBlur()
 {
 	glGenFramebuffers(1, &FBOBlur);
@@ -426,7 +427,7 @@ void setFBOBlur()
 	glGenTextures(1, &blurredTexture);
 	glBindTexture(GL_TEXTURE_2D, blurredTexture);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, blurredTexture, 0);

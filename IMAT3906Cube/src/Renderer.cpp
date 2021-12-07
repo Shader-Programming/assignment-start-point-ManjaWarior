@@ -88,6 +88,18 @@ void Renderer::drawQuad(Shader& shader, unsigned int& textureObj)
 	glBindVertexArray(0);
 }
 
+void Renderer::drawQuad(Shader& shader, unsigned int& textureObj, unsigned int textureObj2)
+{
+	shader.use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textureObj);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, textureObj2);
+	glBindVertexArray(quad1.quadVAO);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+	glBindVertexArray(0);
+}
+
 void Renderer::loadTextureFiles()
 {
 	cubeDiffuse = loadTexture("..\\resources\\SampleTextures\\metalPlate\\diffuse.jpg");
