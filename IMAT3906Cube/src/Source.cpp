@@ -89,7 +89,7 @@ int main()
 	//Renderer
 	Renderer renderer(SCR_WIDTH, SCR_HEIGHT);
 
-	// simple vertex and fragment shader and post processing
+	// simple vertex and fragment shader and post processing shaders
 	Shader cubeShader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
 	Shader floorShader("..\\shaders\\floorVert.vs", "..\\shaders\\floorFrag.fs");
 	Shader postProcess("..\\shaders\\PP.vs", "..\\shaders\\PP.fs");
