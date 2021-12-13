@@ -241,7 +241,7 @@ void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera came
 
 void setUniforms(Shader& cubeShader, Shader& floorShader)
 {
-	float bloomMinBrightness = 0.85f;
+	float bloomMinBrightness = 0.5f;
 	cubeShader.use();
 	//directional light
 	glm::vec3 lightDirection = glm::vec3(0, -1, 0);
