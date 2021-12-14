@@ -10,7 +10,7 @@ Renderer::Renderer(unsigned int sW, unsigned int sH)
 	screenH = sH;
 }
 
-void Renderer::renderScene(Shader& shader, Shader& floorShader, Camera& camera)
+void Renderer::renderScene(Shader& shader, Shader& floorShader, Shader& lightCubeShader, Camera& camera)
 {
 	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)screenW / (float)screenH, 0.1f, 1000.0f);
 	glm::mat4 view = camera.GetViewMatrix();
@@ -28,6 +28,12 @@ void Renderer::renderScene(Shader& shader, Shader& floorShader, Camera& camera)
 	floorShader.setMat4("model", model);
 	floorShader.setVec3("viewPos", camera.Position);
 	renderFloor(floorShader);
+
+	lightCubeShader.use();
+	lightCubeShader.setMat4("projection", projection);
+	lightCubeShader.setMat4("view", view);
+	lightCubeShader.setMat4("model", model);
+	renderLightCubes(lightCubeShader);
 }
 
 void Renderer::renderCubes(Shader& shader)
@@ -76,6 +82,31 @@ void Renderer::renderFloor(Shader& shader)
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
 
+void Renderer::renderLightCubes(Shader& shader)
+{
+	shader.use();
+	shader.setVec3("objectCol", glm::vec3(1.0, 1.0, 1.0));
+	glBindVertexArray(cube1.cubeVAO);  // bind and draw cube
+	glm::mat4 model = glm::mat4(1.0f);
+	glm::mat4 model2 = glm::mat4(1.0f);
+	glm::mat4 model3 = glm::mat4(1.0f);
+	model = glm::scale(model, glm::vec3(0.25f));
+	model = glm::translate(model, glm::vec3(2.0, 3.0, -10.0));
+	shader.setMat4("model", model);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+	shader.setVec3("objectCol", glm::vec3(0.0, 1.0, 0.0));
+	model2 = glm::translate(model2, glm::vec3(-4.0, 0.0, 1.0));
+	model2 = glm::scale(model2, glm::vec3(0.25f));
+	shader.setMat4("model", model2);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+	shader.setVec3("objectCol", glm::vec3(0.0, 0.0, 1.0));
+	model3 = glm::translate(model3, glm::vec3(4.0, 0.0, 1.0));
+	model3 = glm::scale(model3, glm::vec3(0.25f));
+	shader.setMat4("model", model3);
+	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+}
 
 
 void Renderer::drawQuad(Shader& shader, unsigned int& textureObj)

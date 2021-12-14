@@ -20,7 +20,7 @@ class Renderer
 {
 public:
 	Renderer(unsigned int sW, unsigned int sH);
-	void renderScene(Shader& shader, Shader& floorShader, Camera& cam);
+	void renderScene(Shader& shader, Shader& floorShader, Shader& lightCubeShader, Camera& cam);
 
 	void drawQuad(Shader& shader, unsigned int& textureObj);
 	void drawQuad(Shader& shader, unsigned int& textureObj, unsigned int textureObj2);
@@ -28,6 +28,7 @@ public:
 private:
 	void renderCubes(Shader& shader);
 	void renderFloor(Shader& shader);
+	void renderLightCubes(Shader& shader);
 
 	unsigned int loadTexture(char const* path);
 	void loadTextureFiles();

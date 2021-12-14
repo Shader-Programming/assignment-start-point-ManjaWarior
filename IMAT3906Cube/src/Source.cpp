@@ -29,7 +29,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 
 //own functions
-void setUniforms(Shader& shader, Shader& shader2);
+void setUniforms(Shader& shader, Shader& shader2, Shader& shader3);
 void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera camera, bool DL, bool  PL, bool SL, int map, bool NM);
 void setFBOColour();
 void setFBODepth();
@@ -96,12 +96,19 @@ int main()
 	Shader depthPostProcess("..\\shaders\\PP.vs", "..\\shaders\\dPP.fs");
 	Shader blurShader("..\\shaders\\PP.vs", "..\\shaders\\blur.fs");
 	Shader bloomShader("..\\shaders\\PP.vs", "..\\shaders\\BloomShader.fs");
+	Shader lightCubeShader("..\\shaders\\lightCube.vs", "..\\shaders\\lightCube.fs");
 
-	setUniforms(cubeShader, floorShader);
+	setUniforms(cubeShader, floorShader, lightCubeShader);
 
+	postProcess.use();
+	postProcess.setInt("image", 0);
+	depthPostProcess.use();
+	depthPostProcess.setInt("image", 0);
+	blurShader.use();
+	blurShader.setInt("image", 0);
 	bloomShader.use();
 	bloomShader.setInt("image", 0);
-	bloomShader.setInt("bloomBlur", 1);//these changed the look, everything is slightly blurry, higher minBloom results in less blur, maybe a working bloom?
+	bloomShader.setInt("bloomBlur", 1);//bloom is working
 
 	setFBOColourAndDepth();
 	setFBOBlur();
@@ -119,7 +126,7 @@ int main()
 		glBindFramebuffer(GL_FRAMEBUFFER, myFBO);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
-		renderer.renderScene(cubeShader, floorShader, camera);
+		renderer.renderScene(cubeShader, floorShader, lightCubeShader, camera);
 
 		//blur colour attachmet
 		glBindFramebuffer(GL_FRAMEBUFFER, FBOBlur);
@@ -243,9 +250,10 @@ void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera came
 	floorShader.setBool("NM", NM);
 }
 
-void setUniforms(Shader& cubeShader, Shader& floorShader)
+void setUniforms(Shader& cubeShader, Shader& floorShader, Shader& lightcubeShader)
 {
 	float bloomMinBrightness = 0.95f;//needs fiddling with
+
 	cubeShader.use();
 	//directional light
 	glm::vec3 lightDirection = glm::vec3(0, -1, 0);
@@ -261,13 +269,15 @@ void setUniforms(Shader& cubeShader, Shader& floorShader)
 	cubeShader.setInt("specularTexture", 2);
 
 	//point light
-	glm::vec3 pLightPos = glm::vec3(0.0, -1.0, 1.0);
+	glm::vec3 pLightPos = glm::vec3(2.0, 3.0, -10.0);
 	glm::vec3 pLightCol = glm::vec3(1.0, 1.0, 1.0);
+	glm::vec3 pLightCol2 = glm::vec3(0.0, 1.0, 0.0);
+	glm::vec3 pLightCol3 = glm::vec3(0.0, 0.0, 1.0);
 	glm::vec3 pLightPos2 = glm::vec3(-4.0, 0.0, 1.0);
 	glm::vec3 pLightPos3 = glm::vec3(4.0, 0.0, 1.0);
 	float Kc = 1.0f;
-	float Kl = 0.22f;
-	float Ke = 0.2f;
+	float Kl = 0.002f;
+	float Ke = 0.002f;
 
 	cubeShader.setVec3("pLight[0].position", pLightPos);
 	cubeShader.setVec3("pLight[0].color", pLightCol);
@@ -275,12 +285,12 @@ void setUniforms(Shader& cubeShader, Shader& floorShader)
 	cubeShader.setFloat("pLight[0].Kl", Kl);
 	cubeShader.setFloat("pLight[0].Ke", Ke);
 	cubeShader.setVec3("pLight[1].position", pLightPos2);
-	cubeShader.setVec3("pLight[1].color", pLightCol);
+	cubeShader.setVec3("pLight[1].color", pLightCol2);
 	cubeShader.setFloat("pLight[1].Kc", Kc);
 	cubeShader.setFloat("pLight[1].Kl", Kl);
 	cubeShader.setFloat("pLight[1].Ke", Ke);
 	cubeShader.setVec3("pLight[2].position", pLightPos3);
-	cubeShader.setVec3("pLight[2].color", pLightCol);
+	cubeShader.setVec3("pLight[2].color", pLightCol3);
 	cubeShader.setFloat("pLight[2].Kc", Kc);
 	cubeShader.setFloat("pLight[2].Kl", Kl);
 	cubeShader.setFloat("pLight[2].Ke", Ke);
@@ -325,12 +335,12 @@ void setUniforms(Shader& cubeShader, Shader& floorShader)
 	floorShader.setFloat("pLight[0].Kl", Kl);
 	floorShader.setFloat("pLight[0].Ke", Ke);
 	floorShader.setVec3("pLight[1].position", pLightPos2);
-	floorShader.setVec3("pLight[1].color", pLightCol);
+	floorShader.setVec3("pLight[1].color", pLightCol2);
 	floorShader.setFloat("pLight[1].Kc", Kc);
 	floorShader.setFloat("pLight[1].Kl", Kl);
 	floorShader.setFloat("pLight[1].Ke", Ke);
 	floorShader.setVec3("pLight[2].position", pLightPos3);
-	floorShader.setVec3("pLight[2].color", pLightCol);
+	floorShader.setVec3("pLight[2].color", pLightCol3);
 	floorShader.setFloat("pLight[2].Kc", Kc);
 	floorShader.setFloat("pLight[2].Kl", Kl);
 	floorShader.setFloat("pLight[2].Ke", Ke);
