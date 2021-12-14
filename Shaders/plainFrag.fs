@@ -101,12 +101,15 @@ void main()
     result = result + rimLight;
 
     FragColor = vec4(result, 1.0);
-    //brightness calculations
+   
+   /*//brightness calculations
     float brightness = max(max(result.x, result.y), result.z);
     if(brightness > bloomBrightness)
         brightColor = FragColor;
     else
-        brightColor = vec4(vec3(0.0), 1.0);
+        brightColor = vec4(vec3(0.0), 1.0);*/
+
+    brightColor = vec4(vec3(0.0), 1.0);
 }
 
 vec3 getDirectionalLight(vec3 norm, vec3 viewDir)
