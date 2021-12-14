@@ -99,6 +99,10 @@ int main()
 
 	setUniforms(cubeShader, floorShader);
 
+	bloomShader.use();
+	bloomShader.setInt("image", 0);
+	bloomShader.setInt("bloomBlur", 1);//these changed the look, everything is slightly blurry, higher minBloom results in less blur, maybe a working bloom?
+
 	setFBOColourAndDepth();
 	setFBOBlur();
 
@@ -241,7 +245,7 @@ void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera came
 
 void setUniforms(Shader& cubeShader, Shader& floorShader)
 {
-	float bloomMinBrightness = 0.5f;
+	float bloomMinBrightness = 0.95f;//needs fiddling with
 	cubeShader.use();
 	//directional light
 	glm::vec3 lightDirection = glm::vec3(0, -1, 0);
