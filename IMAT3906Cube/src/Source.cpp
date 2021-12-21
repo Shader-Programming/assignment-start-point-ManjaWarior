@@ -21,7 +21,9 @@
 // settings
 const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 900;
-int map;
+
+const unsigned int SH_WIDTH = 1024;
+const unsigned int SH_HEIGHT = 1024;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -38,8 +40,6 @@ void setFBOBlur();
 
 // camera
 Camera camera(glm::vec3(0, 0, 9));
-
-
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -51,6 +51,10 @@ bool NM = true;
 unsigned int myFBO, myFBODepth, depthAttachment;
 unsigned int FBOBlur, blurredTexture;
 unsigned int colourAttachment[3];
+unsigned int depthMap;
+unsigned int map;
+glm::mat4 lightSpaceMatrix;
+
 
 //arrays
 unsigned int floorVBO, cubeVBO, floorEBO, cubeEBO, cubeVAO, floorVAO;
@@ -58,6 +62,9 @@ unsigned int floorVBO, cubeVBO, floorEBO, cubeEBO, cubeVAO, floorVAO;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+
+//light position
+glm::vec3 lightDir = glm::vec3(0.5f, -2.f, -2.f);
 
 int main()
 {
@@ -97,6 +104,7 @@ int main()
 	Shader blurShader("..\\shaders\\PP.vs", "..\\shaders\\blur.fs");
 	Shader bloomShader("..\\shaders\\PP.vs", "..\\shaders\\BloomShader.fs");
 	Shader lightCubeShader("..\\shaders\\lightCube.vs", "..\\shaders\\lightCube.fs");
+	Shader shadowMapShader("..\\shaders\\SM.vs", "..\\shaders\\SM.fs");
 
 	setUniforms(cubeShader, floorShader, lightCubeShader);
 
@@ -110,9 +118,11 @@ int main()
 	bloomShader.setInt("image", 0);
 	bloomShader.setInt("bloomBlur", 1);//bloom is working
 
-	setFBOColourAndDepth();
-	setFBOBlur();
+	//setFBOColourAndDepth();
+	//setFBOBlur();
+	setFBODepth();
 
+	float orthoSize = 10;
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = glfwGetTime();
@@ -123,13 +133,37 @@ int main()
 
 		processInput(window);
 		//1st pass to FBO
-		glBindFramebuffer(GL_FRAMEBUFFER, myFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, myFBODepth);
+		glViewport(0, 0, SH_WIDTH, SH_HEIGHT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
+
+		glm::mat4 lightProjection = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, -orthoSize, 2*orthoSize);
+		glm::mat4 lightView = glm::lookAt(lightDir*glm::vec3(-1.0f), glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+		shadowMapShader.use();
+		shadowMapShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
 		renderer.renderScene(cubeShader, floorShader, lightCubeShader, camera);
 
+		//render shadowMap to screen
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+
+		//2nd pass with normal shader and perspective projection, also need to add depth map
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, depthAttachment);
+
+		renderer.renderScene(cubeShader, floorShader, lightCubeShader, camera);
+
+		/*glBindFramebuffer(GL_FRAMEBUFFER, myFBO);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_DEPTH_TEST);
+		renderer.renderScene(cubeShader, floorShader, lightCubeShader, camera);*/
+
 		//blur colour attachmet
-		glBindFramebuffer(GL_FRAMEBUFFER, FBOBlur);
+		/*glBindFramebuffer(GL_FRAMEBUFFER, FBOBlur);
 		glDisable(GL_DEPTH_TEST);
 		blurShader.use();
 		blurShader.setInt("horz", 1);
@@ -138,12 +172,12 @@ int main()
 		renderer.drawQuad(blurShader, blurredTexture);
 
 		//3rd pass to render screen - QUAD VAO
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);//default FBO
+		/*glBindFramebuffer(GL_FRAMEBUFFER, 0);//default FBO
 		glDisable(GL_DEPTH_TEST);
 		//renderer.drawQuad(postProcess, colourAttachment[0]);
 		renderer.drawQuad(bloomShader, colourAttachment[0], blurredTexture);//should apply bloom to the normal window
 		if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
-			renderer.drawQuad(postProcess, blurredTexture);
+			renderer.drawQuad(postProcess, blurredTexture);*/
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -267,7 +301,8 @@ void setUniforms(Shader& cubeShader, Shader& floorShader, Shader& lightcubeShade
 	cubeShader.setInt("diffuseTexture", 0);
 	cubeShader.setInt("normalMap", 1);
 	cubeShader.setInt("specularTexture", 2);
-
+	cubeShader.setInt("depthMap", 4);
+	cubeShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 	//point light
 	glm::vec3 pLightPos = glm::vec3(2.0, 3.0, -10.0);
 	glm::vec3 pLightCol = glm::vec3(1.0, 1.0, 1.0);
@@ -327,6 +362,8 @@ void setUniforms(Shader& cubeShader, Shader& floorShader, Shader& lightcubeShade
 	floorShader.setInt("specularTexture", 2); 
 	floorShader.setInt("dispMap", 3);
 	floorShader.setFloat("PXscale", 0.0175);
+	floorShader.setInt("depthMap", 4);
+	floorShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
 	//point light
 	floorShader.setVec3("pLight[0].position", pLightPos);
@@ -392,7 +429,7 @@ void setFBODepth()
 	glGenTextures(1, &depthAttachment);
 	glBindTexture(GL_TEXTURE_2D, depthAttachment);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SH_WIDTH, SH_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthAttachment, 0);

@@ -25,9 +25,11 @@ public:
 	void drawQuad(Shader& shader, unsigned int& textureObj);
 	void drawQuad(Shader& shader, unsigned int& textureObj, unsigned int textureObj2);
 
-private:
-	void renderCubes(Shader& shader);
+	void renderCubes(Shader& shader);//maybe move these 2 back later
 	void renderFloor(Shader& shader);
+
+private:
+	
 	void renderLightCubes(Shader& shader);
 
 	unsigned int loadTexture(char const* path);

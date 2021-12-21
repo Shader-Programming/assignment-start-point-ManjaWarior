@@ -31,7 +31,7 @@ struct spotLight
 };
 
 vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light);
-vec3 getDirectionalLight(vec3 norm, vec3 viewDir);
+vec3 getDirectionalLight(vec3 norm, vec3 viewDir, float shadow);
 vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light);
 
 #define numPointLights 3
@@ -60,8 +60,17 @@ float ambientFactor = 0.5f;
 float shine = 128;
 float specularStrength = 0.3f;
 
+//uniforms for shadow mapping
+uniform sampler2D depthMap;
+uniform mat4 lightSpaceMatrix;
+
+float calcShadow(vec4 fragPosLightSpace);
+
 void main()
 {    	
+    vec4 posLS = lightSpaceMatrix * vec4(posWS, 1.0);
+    float shadow = calcShadow(posLS);
+
     vec3 viewDir = normalize(viewPos - posWS);
     vec3 result = vec3(0.0f);
     vec3 norm = vec3(0.0);
@@ -77,7 +86,7 @@ void main()
 
     if(DL == true)
     {
-        result = result + getDirectionalLight(norm, viewDir);
+        result = result + getDirectionalLight(norm, viewDir, shadow);
     }
 
     if(PL == true)
@@ -101,18 +110,10 @@ void main()
     result = result + rimLight;
 
     FragColor = vec4(result, 1.0);
-   
-   /*//brightness calculations
-    float brightness = max(max(result.x, result.y), result.z);
-    if(brightness > bloomBrightness)
-        brightColor = FragColor;
-    else
-        brightColor = vec4(vec3(0.0), 1.0);*/
-
     brightColor = vec4(vec3(0.0), 1.0);
 }
 
-vec3 getDirectionalLight(vec3 norm, vec3 viewDir)
+vec3 getDirectionalLight(vec3 norm, vec3 viewDir, float shadow)
 {
     vec3 diffMapColor = texture(diffuseTexture, uv).rgb;
     float specMapColor = texture(specularTexture, uv).r;
@@ -131,7 +132,7 @@ vec3 getDirectionalLight(vec3 norm, vec3 viewDir)
     specularFactor = pow(specularFactor, shine);
     vec3 specularColor = lightCol * specularFactor * specMapColor ;
 
-    vec3 result = ambientColor + diffuseColor + specularColor;
+    vec3 result = ambientColor + (1.0 - shadow) * (diffuseColor + specularColor);
     return result;
 }
 
@@ -196,4 +197,25 @@ vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light)
 
     vec3 spotLightResult = diffuseColor + specularColor;
     return spotLightResult;
+}
+
+float calcShadow(vec4 fragPosLightSpace)
+{
+    vec2 texelSize = 1.0/ textureSize(depthMap, 0);
+
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+
+    projCoords = projCoords * 0.5 + 0.5;
+
+    float closestDepth = texture(depthMap, projCoords.xy).r;
+
+    float currentDepth = projCoords.z;
+
+    float shadow = 0.0;
+    if(currentDepth > closestDepth)
+    {
+        shadow = 1.0;
+    }
+
+    return shadow;
 }
