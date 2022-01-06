@@ -156,13 +156,6 @@ int main()
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		cubeShader.use();
-		cubeShader.setInt("depthMap", 4);
-		cubeShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
-		floorShader.use();
-		floorShader.setInt("depthMap", 4);
-		floorShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_2D, depthAttachment);
 
@@ -297,7 +290,7 @@ void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera came
 
 void setUniforms(Shader& cubeShader, Shader& floorShader, Shader& lightcubeShader)
 {
-	float bloomMinBrightness = 0.95f;//needs fiddling with
+	float bloomMinBrightness = 0.95f;
 
 	cubeShader.use();
 	//directional light

@@ -175,6 +175,11 @@ vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light, float shadow)
     float dist = length(light.position - posWS);
     float attn = 1.0/(light.Kc + (light.Kl*dist) + (light.Ke*(dist*dist)));
     vec3 sLightDir = normalize(light.position - posWS);
+    //ambient 
+    float ambientFactor = dot(norm, sLightDir);
+    ambientFactor = max(ambientFactor,0.0);
+    vec3 ambientColor = lightCol*diffMapColor*ambientFactor;
+    ambientColor = ambientColor * attn;
     //diffuse
     float diffuseFactor = dot(norm, sLightDir);
     diffuseFactor = max(diffuseFactor,0.0);
@@ -194,8 +199,9 @@ vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light, float shadow)
     illum = clamp(illum, 0.0,1.0);
     diffuseColor = diffuseColor * illum;
     specularColor = specularColor * illum;
+    ambientColor = ambientColor * illum;
 
-    vec3 spotLightResult = (1.0 - shadow) * (diffuseColor + specularColor);
+    vec3 spotLightResult = (ambientColor * 0.05f) + (1.0 - shadow) * (diffuseColor + specularColor);
     return spotLightResult;
 }
 

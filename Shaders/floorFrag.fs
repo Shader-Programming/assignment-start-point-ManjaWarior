@@ -172,7 +172,7 @@ vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light, vec2 texCoords, fl
     specularFactor = pow(specularFactor, shine);
     vec3 specularColor = light.color * specularFactor * specMapColor * 0.5f ;
     specularColor = specularColor * attn;
-    vec3 pointLightResult = (1.0 - shadow) * (ambientColor + diffuseColor + specularColor) * 0.4f;
+    vec3 pointLightResult = (ambientColor * 0.4f) + (1.0 - shadow) * (diffuseColor + specularColor) * 0.4f;
     
     return pointLightResult;
 }
@@ -187,6 +187,11 @@ vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light, vec2 texCoords, floa
     float dist = length(light.position - posWS);
     float attn = 1.0/(light.Kc + (light.Kl*dist) + (light.Ke*(dist*dist)));
     vec3 sLightDir = normalize(light.position - posWS);
+    //ambient 
+    float ambientFactor = dot(norm, sLightDir);
+    ambientFactor = max(ambientFactor,0.0);
+    vec3 ambientColor = lightCol*diffMapColor*ambientFactor;
+    ambientColor = ambientColor * attn;
     //diffuse
     float diffuseFactor = dot(norm, sLightDir);
     diffuseFactor = max(diffuseFactor,0.0);
@@ -206,8 +211,8 @@ vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light, vec2 texCoords, floa
     illum = clamp(illum, 0.0,1.0);
     diffuseColor = diffuseColor * illum;
     specularColor = specularColor * illum;
-
-    vec3 spotLightResult = (1.0 - shadow) * (diffuseColor + specularColor);
+    ambientColor = ambientColor * illum;
+    vec3 spotLightResult = (ambientColor * 0.05f) + (1.0 - shadow) * (diffuseColor + specularColor);
     return spotLightResult;
 }
 
