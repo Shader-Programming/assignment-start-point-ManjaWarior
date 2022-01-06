@@ -119,14 +119,8 @@ void main()
         }
     }
 
-    FragColor = vec4(result, 1.0);
 
-    /*//brightness calculations
-    float brightness = max(max(result.x, result.y), result.z);
-    if(brightness > bloomBrightness)
-        brightColor = FragColor;
-    else
-        brightColor = vec4(vec3(0.0), 1.0);*/
+    FragColor = vec4(result, 1.0);
 
     brightColor = vec4(vec3(0.0), 1.0);
 }

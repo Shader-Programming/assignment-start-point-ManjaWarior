@@ -30,6 +30,15 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 
+//light position
+glm::vec3 lightDir = glm::vec3(1.0f, -2.f, -2.f);
+
+float orthoSize = 10;
+
+glm::mat4 lightProjection = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, -orthoSize, 2 * orthoSize);
+glm::mat4 lightView = glm::lookAt(lightDir * glm::vec3(-1.0f), glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+
 //own functions
 void setUniforms(Shader& shader, Shader& shader2, Shader& shader3);
 void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera camera, bool DL, bool  PL, bool SL, int map, bool NM);
@@ -53,8 +62,6 @@ unsigned int FBOBlur, blurredTexture;
 unsigned int colourAttachment[3];
 unsigned int depthMap;
 unsigned int map;
-glm::mat4 lightSpaceMatrix;
-
 
 //arrays
 unsigned int floorVBO, cubeVBO, floorEBO, cubeEBO, cubeVAO, floorVAO;
@@ -62,9 +69,6 @@ unsigned int floorVBO, cubeVBO, floorEBO, cubeEBO, cubeVAO, floorVAO;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
-
-//light position
-glm::vec3 lightDir = glm::vec3(1.0f, 2.f, -2.f);
 
 int main()
 {
@@ -118,11 +122,10 @@ int main()
 	bloomShader.setInt("image", 0);
 	bloomShader.setInt("bloomBlur", 1);//bloom is working
 
-	//setFBOColourAndDepth();
-	//setFBOBlur();
+	setFBOColourAndDepth();
+	setFBOBlur();
 	setFBODepth();
 
-	float orthoSize = 10;
 	while (!glfwWindowShouldClose(window))
 	{
 		float currentFrame = glfwGetTime();
@@ -132,46 +135,46 @@ int main()
 		updatePerFrameUniforms(cubeShader, floorShader, camera, DL, PL, SL, map, NM);
 
 		processInput(window);
-		//1st pass to FBO
+		//1st pass to FBO for shadow map
 		glBindFramebuffer(GL_FRAMEBUFFER, myFBODepth);
 		glViewport(0, 0, SH_WIDTH, SH_HEIGHT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
-
-		glm::mat4 lightProjection = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, -orthoSize, 2*orthoSize);
-		glm::mat4 lightView = glm::lookAt(lightDir*glm::vec3(-1.0f), glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
-		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 		shadowMapShader.use();
 		shadowMapShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
-		renderer.renderScene(cubeShader, floorShader, lightCubeShader, camera);
+		renderer.renderCubes(shadowMapShader);
+		renderer.renderFloor(shadowMapShader);
 
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		//glDisable(GL_DEPTH_TEST);
-		renderer.drawQuad(depthPostProcess, depthAttachment);
+		//renderer.drawQuad(depthPostProcess, depthAttachment);
+		// use above for rendering shadow map to screen
+		// 
 		// 
 		//2nd pass with normal shader and perspective projection, also need to add depth map
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_2D, depthAttachment);
 		cubeShader.use();
 		cubeShader.setInt("depthMap", 4);
 		cubeShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 		floorShader.use();
 		floorShader.setInt("depthMap", 4);
 		floorShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, depthAttachment);
 
 		renderer.renderScene(cubeShader, floorShader, lightCubeShader, camera);
 
-		/*glBindFramebuffer(GL_FRAMEBUFFER, myFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, myFBO);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
-		renderer.renderScene(cubeShader, floorShader, lightCubeShader, camera);*/
+		renderer.renderScene(cubeShader, floorShader, lightCubeShader, camera);
 
 		//blur colour attachmet
-		/*glBindFramebuffer(GL_FRAMEBUFFER, FBOBlur);
+		glBindFramebuffer(GL_FRAMEBUFFER, FBOBlur);
 		glDisable(GL_DEPTH_TEST);
 		blurShader.use();
 		blurShader.setInt("horz", 1);
@@ -180,12 +183,12 @@ int main()
 		renderer.drawQuad(blurShader, blurredTexture);
 
 		//3rd pass to render screen - QUAD VAO
-		/*glBindFramebuffer(GL_FRAMEBUFFER, 0);//default FBO
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);//default FBO
 		glDisable(GL_DEPTH_TEST);
 		//renderer.drawQuad(postProcess, colourAttachment[0]);
 		renderer.drawQuad(bloomShader, colourAttachment[0], blurredTexture);//should apply bloom to the normal window
 		if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
-			renderer.drawQuad(postProcess, blurredTexture);*/
+			renderer.drawQuad(postProcess, blurredTexture);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
