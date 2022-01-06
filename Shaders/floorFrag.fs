@@ -30,9 +30,9 @@ struct spotLight
     float outerRad;
 };
 
-vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light, vec2 texCoords);
-vec3 getDirectionalLight(vec3 norm, vec3 viewDir, vec2 texCoords);
-vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light, vec2 texCoords);
+vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light, vec2 texCoords, float shadow);
+vec3 getDirectionalLight(vec3 norm, vec3 viewDir, vec2 texCoords, float shadow);
+vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light, vec2 texCoords, float shadow);
 vec2 ParallaxMapping(vec2 uv, vec3 viewDir);
 vec2 SteepParallaxMapping(vec2 uv, vec3 viewDir);
 
@@ -66,12 +66,21 @@ uniform float bloomBrightness;
 float ambientFactor = 0.5f;
 float shine = 128;
 
+//shadow mapping
+uniform sampler2D depthMap;
+uniform mat4 lightSpaceMatrix;
+
+float calcShadow(vec4 fragPosLightSpace);
+
 void main()
 {    	
     vec3 viewDir = normalize(viewPos - posWS);
     vec2 texCoords = uv;
     vec3 result = vec3(0.0f);
     vec3 norm = vec3(0.0);
+
+    vec4 posLS = lightSpaceMatrix * vec4(posWS, 1.0);
+    float shadow = calcShadow(posLS);
 
     if(NM == true)
     {
@@ -91,14 +100,14 @@ void main()
 
     if(DL == true)
     {
-        result = result + getDirectionalLight(norm, viewDir, texCoords);
+        result = result + getDirectionalLight(norm, viewDir, texCoords, shadow);
     }
 
     if(PL == true)
     {
         for(int i = 0; i < numPointLights; i++)
         {
-            result = result + getPointLight(norm, viewDir, pLight[i], texCoords);
+            result = result + getPointLight(norm, viewDir, pLight[i], texCoords, shadow);
         }
     }
 
@@ -106,7 +115,7 @@ void main()
     {
         for(int i = 0; i < numSpotLights; i++)
         {
-            result = result + getSpotLight(norm, viewDir, sLight[i], texCoords);
+            result = result + getSpotLight(norm, viewDir, sLight[i], texCoords, shadow);
         }
     }
 
@@ -122,7 +131,7 @@ void main()
     brightColor = vec4(vec3(0.0), 1.0);
 }
 
-vec3 getDirectionalLight(vec3 norm, vec3 viewDir, vec2 texCoords)
+vec3 getDirectionalLight(vec3 norm, vec3 viewDir, vec2 texCoords, float shadow)
 {
     vec3 diffMapColor = texture(diffuseTexture, texCoords).rgb;
     float specMapColor = texture(specularTexture, texCoords).r;
@@ -141,11 +150,11 @@ vec3 getDirectionalLight(vec3 norm, vec3 viewDir, vec2 texCoords)
     specularFactor = pow(specularFactor, shine);
     vec3 specularColor = lightCol * specularFactor * specMapColor * 0.5f ;
 
-    vec3 result = ambientColor + diffuseColor + specularColor;
+    vec3 result = ambientColor + (1.0 - shadow) * (diffuseColor + specularColor);
     return result;
 }
 
-vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light, vec2 texCoords)
+vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light, vec2 texCoords, float shadow)
 {
     vec3 diffMapColor = texture(diffuseTexture, texCoords).xyz; 
     float specMapColor = texture(specularTexture, texCoords).x;
@@ -169,12 +178,12 @@ vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light, vec2 texCoords)
     specularFactor = pow(specularFactor, shine);
     vec3 specularColor = light.color * specularFactor * specMapColor * 0.5f ;
     specularColor = specularColor * attn;
-    vec3 pointLightResult = (ambientColor + diffuseColor + specularColor) * 0.4f;
-
+    vec3 pointLightResult = (1.0 - shadow) * (ambientColor + diffuseColor + specularColor) * 0.4f;
+    
     return pointLightResult;
 }
 
-vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light, vec2 texCoords)
+vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light, vec2 texCoords, float shadow)
 {
 
     vec3 diffMapColor = texture(diffuseTexture, texCoords).xyz;
@@ -204,7 +213,7 @@ vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light, vec2 texCoords)
     diffuseColor = diffuseColor * illum;
     specularColor = specularColor * illum;
 
-    vec3 spotLightResult = diffuseColor + specularColor;
+    vec3 spotLightResult = (1.0 - shadow) * (diffuseColor + specularColor);
     return spotLightResult;
 }
 
@@ -246,4 +255,25 @@ vec2 SteepParallaxMapping(vec2 texCoords, vec3 viewDir)
     vec2 finalTexCoords = prevTexCoords *weight + currentTexCoords * (1.0 - weight);
 
     return finalTexCoords;
+}
+
+float calcShadow(vec4 fragPosLightSpace)
+{
+    vec2 texelSize = 1.0/ textureSize(depthMap, 0);
+
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+
+    projCoords = projCoords * 0.5 + 0.5;
+
+    float closestDepth = texture(depthMap, projCoords.xy).r;
+
+    float currentDepth = projCoords.z;
+
+    float shadow = 0.0;
+    if(currentDepth > closestDepth)
+    {
+        shadow = 1.0;
+    }
+
+    return shadow;
 }

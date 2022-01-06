@@ -30,9 +30,9 @@ struct spotLight
     float outerRad;
 };
 
-vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light);
+vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light, float shadow);
 vec3 getDirectionalLight(vec3 norm, vec3 viewDir, float shadow);
-vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light);
+vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light, float shadow);
 
 #define numPointLights 3
 uniform pointLight pLight[numPointLights];
@@ -93,7 +93,7 @@ void main()
     {
         for(int i = 0; i < numPointLights; i++)
         {
-            result = result + getPointLight(norm, viewDir, pLight[i]);
+            result = result + getPointLight(norm, viewDir, pLight[i], shadow);
         }
     }
 
@@ -101,7 +101,7 @@ void main()
     {
         for(int i = 0; i < numSpotLights; i++)
         {
-            result = result + getSpotLight(norm, viewDir, sLight[i]);
+            result = result + getSpotLight(norm, viewDir, sLight[i], shadow);
         }
     }
 
@@ -136,7 +136,7 @@ vec3 getDirectionalLight(vec3 norm, vec3 viewDir, float shadow)
     return result;
 }
 
-vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light)
+vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light, float shadow)
 {
     vec3 diffMapColor = texture(diffuseTexture, uv).xyz;
     float specMapColor = texture(specularTexture, uv).x;
@@ -160,12 +160,12 @@ vec3 getPointLight(vec3 norm, vec3 viewDir, pointLight light)
     specularFactor = pow(specularFactor, shine);
     vec3 specularColor = light.color * specularFactor * specMapColor;
     specularColor = specularColor * attn;
-    vec3 pointLightResult = ambientColor + diffuseColor + specularColor;
+    vec3 pointLightResult = ambientColor  + (1.0 - shadow) * (diffuseColor + specularColor);
 
     return pointLightResult;
 }
 
-vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light)
+vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light, float shadow)
 {
 
     vec3 diffMapColor = texture(diffuseTexture, uv).xyz;
@@ -195,7 +195,7 @@ vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light)
     diffuseColor = diffuseColor * illum;
     specularColor = specularColor * illum;
 
-    vec3 spotLightResult = diffuseColor + specularColor;
+    vec3 spotLightResult = (1.0 - shadow) * (diffuseColor + specularColor);
     return spotLightResult;
 }
 

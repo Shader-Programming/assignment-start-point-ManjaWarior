@@ -64,7 +64,7 @@ float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 //light position
-glm::vec3 lightDir = glm::vec3(0.5f, -2.f, -2.f);
+glm::vec3 lightDir = glm::vec3(1.0f, 2.f, -2.f);
 
 int main()
 {
@@ -146,14 +146,22 @@ int main()
 
 		renderer.renderScene(cubeShader, floorShader, lightCubeShader, camera);
 
-		//render shadowMap to screen
+		//glDisable(GL_DEPTH_TEST);
+		renderer.drawQuad(depthPostProcess, depthAttachment);
+		// 
+		//2nd pass with normal shader and perspective projection, also need to add depth map
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-
-		//2nd pass with normal shader and perspective projection, also need to add depth map
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
 		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_2D, depthAttachment);
+		cubeShader.use();
+		cubeShader.setInt("depthMap", 4);
+		cubeShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
+		floorShader.use();
+		floorShader.setInt("depthMap", 4);
+		floorShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
 		renderer.renderScene(cubeShader, floorShader, lightCubeShader, camera);
 
