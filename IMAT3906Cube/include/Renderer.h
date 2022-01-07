@@ -15,12 +15,13 @@
 #include "Cube.h"
 #include "Floor.h"
 #include "Quad.h"
+#include "SkyBox.h"
 
 class Renderer
 {
 public:
 	Renderer(unsigned int sW, unsigned int sH);
-	void renderScene(Shader& shader, Shader& floorShader, Shader& lightCubeShader, Camera& cam);
+	void renderScene(Shader& shader, Shader& floorShader, Shader& lightCubeShader, Shader& skyBoxShader, Camera& cam);
 
 	void drawQuad(Shader& shader, unsigned int& textureObj);
 	void drawQuad(Shader& shader, unsigned int& textureObj, unsigned int textureObj2);
@@ -38,6 +39,7 @@ private:
 	Cube cube1;
 	Floor floor1;
 	Quad quad1;
+	SkyBox skyBox;
 
 	unsigned int screenW, screenH;
 

@@ -8,9 +8,11 @@ Renderer::Renderer(unsigned int sW, unsigned int sH)
 	loadTextureFiles();
 	screenW = sW;
 	screenH = sH;
+
+	skyBox.createSkyBox();
 }
 
-void Renderer::renderScene(Shader& shader, Shader& floorShader, Shader& lightCubeShader, Camera& camera)
+void Renderer::renderScene(Shader& shader, Shader& floorShader, Shader& lightCubeShader, Shader& skyBoxShader, Camera& camera)
 {
 	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)screenW / (float)screenH, 0.1f, 1000.0f);
 	glm::mat4 view = camera.GetViewMatrix();
@@ -34,6 +36,11 @@ void Renderer::renderScene(Shader& shader, Shader& floorShader, Shader& lightCub
 	lightCubeShader.setMat4("view", view);
 	lightCubeShader.setMat4("model", model);
 	renderLightCubes(lightCubeShader);
+
+	skyBoxShader.use();
+	skyBoxShader.setMat4("projection", projection);
+	skyBoxShader.setMat4("view", glm::mat4(glm::mat3(camera.GetViewMatrix())));
+	skyBox.renderSkyBox(skyBoxShader);
 }
 
 void Renderer::renderCubes(Shader& shader)

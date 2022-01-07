@@ -103,12 +103,16 @@ int main()
 	// simple vertex and fragment shader and post processing shaders
 	Shader cubeShader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
 	Shader floorShader("..\\shaders\\floorVert.vs", "..\\shaders\\floorFrag.fs");
+
 	Shader postProcess("..\\shaders\\PP.vs", "..\\shaders\\PP.fs");
 	Shader depthPostProcess("..\\shaders\\PP.vs", "..\\shaders\\dPP.fs");
 	Shader blurShader("..\\shaders\\PP.vs", "..\\shaders\\blur.fs");
 	Shader bloomShader("..\\shaders\\PP.vs", "..\\shaders\\BloomShader.fs");
+
 	Shader lightCubeShader("..\\shaders\\lightCube.vs", "..\\shaders\\lightCube.fs");
+
 	Shader shadowMapShader("..\\shaders\\SM.vs", "..\\shaders\\SM.fs");
+	Shader skyBoxShader("..\\shaders\\SB.vs", "..\\shaders\\SB.fs");
 
 	setUniforms(cubeShader, floorShader, lightCubeShader);
 
@@ -121,6 +125,8 @@ int main()
 	bloomShader.use();
 	bloomShader.setInt("image", 0);
 	bloomShader.setInt("bloomBlur", 1);//bloom is working
+	skyBoxShader.use();
+	skyBoxShader.setInt("skybox", 0);
 
 	setFBOColourAndDepth();
 	setFBOBlur();
@@ -155,13 +161,13 @@ int main()
 		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_2D, depthAttachment);
 
-		renderer.renderScene(cubeShader, floorShader, lightCubeShader, camera);
+		renderer.renderScene(cubeShader, floorShader, lightCubeShader, skyBoxShader, camera);
 
 		//bind colour to FBO
 		glBindFramebuffer(GL_FRAMEBUFFER, myFBO);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
-		renderer.renderScene(cubeShader, floorShader, lightCubeShader, camera);
+		renderer.renderScene(cubeShader, floorShader, lightCubeShader, skyBoxShader, camera);
 
 		//blur colour attachment
 		glBindFramebuffer(GL_FRAMEBUFFER, FBOBlur);
