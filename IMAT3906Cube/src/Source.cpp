@@ -31,12 +31,12 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 
 //light position
-glm::vec3 lightDir = glm::vec3(1.0f, -2.f, -2.f);
+glm::vec3 lightDir = glm::vec3(1.0f, -3.f, -1.f);
 
 float orthoSize = 10;
 
 glm::mat4 lightProjection = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, -orthoSize, 2 * orthoSize);
-glm::mat4 lightView = glm::lookAt(lightDir * glm::vec3(-1.0f), glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+glm::mat4 lightView = glm::lookAt(lightDir * glm::vec3(-1.f), glm::vec3(0.f), glm::vec3(0.0, 1.0, 0.0));
 glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
 //own functions
@@ -143,15 +143,11 @@ int main()
 		shadowMapShader.use();
 		shadowMapShader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
+		glCullFace(GL_FRONT);
 		renderer.renderCubes(shadowMapShader);
 		renderer.renderFloor(shadowMapShader);
+		glCullFace(GL_BACK);//CullFace method solves peter panning issues
 
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//glDisable(GL_DEPTH_TEST);
-		//renderer.drawQuad(depthPostProcess, depthAttachment);
-		// use above for rendering shadow map to screen
-		// 
-		// 
 		//2nd pass with normal shader and perspective projection, also need to add depth map
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
@@ -161,12 +157,13 @@ int main()
 
 		renderer.renderScene(cubeShader, floorShader, lightCubeShader, camera);
 
+		//bind colour to FBO
 		glBindFramebuffer(GL_FRAMEBUFFER, myFBO);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 		renderer.renderScene(cubeShader, floorShader, lightCubeShader, camera);
 
-		//blur colour attachmet
+		//blur colour attachment
 		glBindFramebuffer(GL_FRAMEBUFFER, FBOBlur);
 		glDisable(GL_DEPTH_TEST);
 		blurShader.use();
@@ -181,7 +178,8 @@ int main()
 		//renderer.drawQuad(postProcess, colourAttachment[0]);
 		renderer.drawQuad(bloomShader, colourAttachment[0], blurredTexture);//should apply bloom to the normal window
 		if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS)
-			renderer.drawQuad(postProcess, blurredTexture);
+			renderer.drawQuad(depthPostProcess, depthAttachment);//shows the depth map from light perspective
+
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -436,6 +434,10 @@ void setFBODepth()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SH_WIDTH, SH_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);//prevents shadows repeating and clamps them to the custom border
+	float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthAttachment, 0);
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
@@ -458,6 +460,8 @@ void setFBOColourAndDepth()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colourAttachment[i], 0);
 	}
 	//depth

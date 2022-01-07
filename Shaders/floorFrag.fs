@@ -70,7 +70,7 @@ float shine = 128;
 uniform sampler2D depthMap;
 uniform mat4 lightSpaceMatrix;
 
-float calcShadow(vec4 fragPosLightSpace);
+float calcShadow(vec4 fragPosLightSpace, float dotLightNormal);
 
 void main()
 {    	
@@ -80,7 +80,10 @@ void main()
     vec3 norm = vec3(0.0);
 
     vec4 posLS = lightSpaceMatrix * vec4(posWS, 1.0);
-    float shadow = calcShadow(posLS);
+    float dotLightNormal = dot(lightDir, norm);
+    float shadow = calcShadow(posLS, dotLightNormal);
+
+    shadow = shadow;
 
     if(NM == true)
     {
@@ -212,7 +215,7 @@ vec3 getSpotLight(vec3 norm, vec3 viewDir, spotLight light, vec2 texCoords, floa
     diffuseColor = diffuseColor * illum;
     specularColor = specularColor * illum;
     ambientColor = ambientColor * illum;
-    vec3 spotLightResult = (ambientColor * 0.05f) + (1.0 - shadow) * (diffuseColor + specularColor);
+    vec3 spotLightResult = (ambientColor * 0.1f) + (1.0 - shadow) * (diffuseColor + specularColor);
     return spotLightResult;
 }
 
@@ -256,7 +259,7 @@ vec2 SteepParallaxMapping(vec2 texCoords, vec3 viewDir)
     return finalTexCoords;
 }
 
-float calcShadow(vec4 fragPosLightSpace)
+float calcShadow(vec4 fragPosLightSpace, float dotLightNormal)
 {
     vec2 texelSize = 1.0/ textureSize(depthMap, 0);
 
@@ -269,9 +272,26 @@ float calcShadow(vec4 fragPosLightSpace)
     float currentDepth = projCoords.z;
 
     float shadow = 0.0;
-    if(currentDepth > closestDepth)
+
+    //float bias = 0.015f;
+
+    float bias = max(0.05 * (1.0 - dotLightNormal), 0.0005);
+
+    for(int x = -1; x <= 1; x++)
     {
-        shadow = 1.0;
+        for(int y = -1; y <= 1; y++)
+        {
+            float pcfDepth = texture(depthMap, projCoords.xy + vec2(x, y) * texelSize).r;
+            if(currentDepth - bias > pcfDepth)
+                shadow += 1;
+        }
+
+    }
+    shadow = shadow/9; // 3x3 kernel
+
+    if(projCoords.z > 1.0)
+    {
+        shadow = 0.0;
     }
 
     return shadow;

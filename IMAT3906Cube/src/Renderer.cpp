@@ -63,7 +63,7 @@ void Renderer::renderCubes(Shader& shader)
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 	model = glm::mat4(1.0f);
-	model = glm::translate(model, glm::vec3(0.0, 1.0, 1.3));
+	model = glm::translate(model, glm::vec3(-1., 5., 1.5));
 	shader.setMat4("model", model);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 }
