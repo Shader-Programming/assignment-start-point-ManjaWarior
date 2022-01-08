@@ -40,7 +40,7 @@ glm::mat4 lightView = glm::lookAt(lightDir * glm::vec3(-1.f), glm::vec3(0.f), gl
 glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
 //own functions
-void setUniforms(Shader& shader, Shader& shader2, Shader& shader3);
+void setUniforms(Shader& shader, Shader& shader2, Shader& shader3, Shader& shader4, Shader& shader5, Shader& shader6, Shader& shader7);
 void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera camera, bool DL, bool  PL, bool SL, int map, bool NM);
 void setFBOColour();
 void setFBODepth();
@@ -114,19 +114,7 @@ int main()
 	Shader shadowMapShader("..\\shaders\\SM.vs", "..\\shaders\\SM.fs");
 	Shader skyBoxShader("..\\shaders\\SB.vs", "..\\shaders\\SB.fs");
 
-	setUniforms(cubeShader, floorShader, lightCubeShader);
-
-	postProcess.use();
-	postProcess.setInt("image", 0);
-	depthPostProcess.use();
-	depthPostProcess.setInt("image", 0);
-	blurShader.use();
-	blurShader.setInt("image", 0);
-	bloomShader.use();
-	bloomShader.setInt("image", 0);
-	bloomShader.setInt("bloomBlur", 1);//bloom is working
-	skyBoxShader.use();
-	skyBoxShader.setInt("skybox", 0);
+	setUniforms(cubeShader, floorShader, postProcess, depthPostProcess, blurShader, bloomShader, skyBoxShader);
 
 	setFBOColourAndDepth();
 	setFBOBlur();
@@ -292,7 +280,7 @@ void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera came
 	floorShader.setBool("NM", NM);
 }
 
-void setUniforms(Shader& cubeShader, Shader& floorShader, Shader& lightcubeShader)
+void setUniforms(Shader& cubeShader, Shader& floorShader, Shader& postProcess, Shader& depthPostProcess, Shader& blurShader, Shader& bloomShader, Shader& skyBoxShader)
 {
 	float bloomMinBrightness = 0.95f;
 
@@ -406,6 +394,19 @@ void setUniforms(Shader& cubeShader, Shader& floorShader, Shader& lightcubeShade
 	floorShader.setFloat("sLight[1].Ke", 0.0028f);
 	floorShader.setFloat("sLight[1].innerRad", glm::cos(glm::radians(12.5f)));
 	floorShader.setFloat("sLight[1].outerRad", glm::cos(glm::radians(17.5f)));
+
+
+	postProcess.use();
+	postProcess.setInt("image", 0);
+	depthPostProcess.use();
+	depthPostProcess.setInt("image", 0);
+	blurShader.use();
+	blurShader.setInt("image", 0);
+	bloomShader.use();
+	bloomShader.setInt("image", 0);
+	bloomShader.setInt("bloomBlur", 1);//bloom is working
+	skyBoxShader.use();
+	skyBoxShader.setInt("skybox", 0);
 }
 
 void setFBOColour()

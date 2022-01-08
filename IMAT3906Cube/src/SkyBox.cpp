@@ -23,12 +23,12 @@ void SkyBox::renderSkyBox(Shader& shader)
 
 void SkyBox::loadCubeMapTextures()
 {
-	faces.push_back("..\\resources\\SkyBox\\elyvisions\\skyast_rt.png");
-	faces.push_back("..\\resources\\SkyBox\\elyvisions\\skyast_lf.png");
-	faces.push_back("..\\resources\\SkyBox\\elyvisions\\skyast_up.png");
-	faces.push_back("..\\resources\\SkyBox\\elyvisions\\skyast_dn.png");
-	faces.push_back("..\\resources\\SkyBox\\elyvisions\\skyast_ft.png");
-	faces.push_back("..\\resources\\SkyBox\\elyvisions\\skyast_bk.png");
+	faces.push_back("..\\resources\\SkyBox\\bkg\\lightblue\\right.png");//right
+	faces.push_back("..\\resources\\SkyBox\\bkg\\lightblue\\left.png");//left
+	faces.push_back("..\\resources\\SkyBox\\bkg\\lightblue\\top.png");//top
+	faces.push_back("..\\resources\\SkyBox\\bkg\\lightblue\\bot.png");//bottom
+	faces.push_back("..\\resources\\SkyBox\\bkg\\lightblue\\front.png");//front
+	faces.push_back("..\\resources\\SkyBox\\bkg\\lightblue\\back.png");//back
 
 	skyBoxTexObj = loadCubeMap(faces);
 }
