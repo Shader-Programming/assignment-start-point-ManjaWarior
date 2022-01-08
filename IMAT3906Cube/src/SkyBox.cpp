@@ -13,12 +13,12 @@ void SkyBox::createSkyBox()
 void SkyBox::renderSkyBox(Shader& shader)
 {
 	shader.use();
-	glDepthMask(GL_FALSE);
+	glDepthFunc(GL_LEQUAL);
 	glBindVertexArray(skyBoxVAO);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skyBoxTexObj);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
-	glDepthMask(GL_TRUE);
+	glDepthFunc(GL_LESS);
 }
 
 void SkyBox::loadCubeMapTextures()

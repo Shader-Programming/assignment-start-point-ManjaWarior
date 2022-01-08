@@ -2,14 +2,14 @@
 
 Renderer::Renderer(unsigned int sW, unsigned int sH)
 {
+	skyBox.createSkyBox();
+
 	cube1.createCube();
 	floor1.createFloor();
 	quad1.createQuad();
 	loadTextureFiles();
 	screenW = sW;
 	screenH = sH;
-
-	skyBox.createSkyBox();
 }
 
 void Renderer::renderScene(Shader& shader, Shader& floorShader, Shader& lightCubeShader, Shader& skyBoxShader, Camera& camera)
