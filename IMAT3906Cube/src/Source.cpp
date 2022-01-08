@@ -40,7 +40,7 @@ glm::mat4 lightView = glm::lookAt(lightDir * glm::vec3(-1.f), glm::vec3(0.f), gl
 glm::mat4 lightSpaceMatrix = lightProjection * lightView;
 
 //own functions
-void setUniforms(Shader& shader, Shader& shader2, Shader& shader3, Shader& shader4, Shader& shader5, Shader& shader6, Shader& shader7);
+void setUniforms(Shader& shader, Shader& shader2, Shader& shader3, Shader& shader4, Shader& shader5, Shader& shader6, Shader& shader7);//updates all shaders before running
 void updatePerFrameUniforms(Shader& cubeShader, Shader& floorShader, Camera camera, bool DL, bool  PL, bool SL, int map, bool NM);
 void setFBOColour();
 void setFBODepth();
