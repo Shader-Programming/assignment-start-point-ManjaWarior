@@ -16,8 +16,8 @@ void main()
 	//tone mapping
 	//vec3 reinhard = hdrColor/(hdrColor + vec3(1.0)); //2.0 looks better worst case scenario
 
-	vec3 result = vec3(1.0) - exp(-hdrColor * 0.5f);//taken from LearnOpenGL website for new tone mapping
-	result = pow(result, vec3(1.0 / gamma));//is this reinhard? Only the gods can decide
+	vec3 result = vec3(1.0) - exp(-hdrColor * 0.5f);
+	result = pow(result, vec3(1.0 / gamma));
 	
 	FragColor = vec4(result, 1.0);
 }

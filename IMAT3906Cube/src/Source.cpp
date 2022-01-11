@@ -33,7 +33,7 @@ void processInput(GLFWwindow* window);
 //light position
 glm::vec3 lightDir = glm::vec3(1.0f, -3.f, -1.f);
 
-float orthoSize = 10;
+float orthoSize = 8;
 
 glm::mat4 lightProjection = glm::ortho(-orthoSize, orthoSize, -orthoSize, orthoSize, -orthoSize, 2 * orthoSize);
 glm::mat4 lightView = glm::lookAt(lightDir * glm::vec3(-1.f), glm::vec3(0.f), glm::vec3(0.0, 1.0, 0.0));
@@ -303,7 +303,7 @@ void setUniforms(Shader& cubeShader, Shader& floorShader, Shader& postProcess, S
 	glm::vec3 pLightPos = glm::vec3(2.0, 3.0, -10.0);
 	glm::vec3 pLightCol = glm::vec3(1.0, 1.0, 1.0);
 	glm::vec3 pLightCol2 = glm::vec3(0.0, 1.0, 0.0);
-	glm::vec3 pLightCol3 = glm::vec3(0.0, 0.0, 1.0);
+	glm::vec3 pLightCol3 = glm::vec3(1.0, 0.0, 0.0);
 	glm::vec3 pLightPos2 = glm::vec3(-4.0, 0.0, 1.0);
 	glm::vec3 pLightPos3 = glm::vec3(4.0, 0.0, 1.0);
 	float Kc = 1.0f;

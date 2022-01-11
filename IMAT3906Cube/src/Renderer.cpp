@@ -113,7 +113,7 @@ void Renderer::renderLightCubes(Shader& shader)
 	shader.setMat4("model", model2);
 	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
-	shader.setVec3("objectCol", glm::vec3(0.0, 0.0, 1.0));
+	shader.setVec3("objectCol", glm::vec3(1.0, 0.0, 0.0));
 	model3 = glm::translate(model3, glm::vec3(4.0, 0.0, 1.0));
 	model3 = glm::scale(model3, glm::vec3(0.25f));
 	shader.setMat4("model", model3);

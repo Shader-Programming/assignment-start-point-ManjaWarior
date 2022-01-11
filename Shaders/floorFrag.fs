@@ -277,9 +277,9 @@ float calcShadow(vec4 fragPosLightSpace, float dotLightNormal)
 
     float bias = max(0.05 * (1.0 - dotLightNormal), 0.0005);
 
-    for(int x = -1; x <= 1; x++)
+    for(int x = -1; x <= 2; x++)
     {
-        for(int y = -1; y <= 1; y++)
+        for(int y = -1; y <= 2; y++)
         {
             float pcfDepth = texture(depthMap, projCoords.xy + vec2(x, y) * texelSize).r;
             if(currentDepth - bias > pcfDepth)
@@ -287,7 +287,7 @@ float calcShadow(vec4 fragPosLightSpace, float dotLightNormal)
         }
 
     }
-    shadow = shadow/9; // 3x3 kernel
+    shadow = shadow/16; // 4x4 kernel
 
     if(projCoords.z > 1.0)
     {

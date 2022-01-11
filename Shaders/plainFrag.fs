@@ -237,7 +237,7 @@ float calcShadow(vec4 fragPosLightSpace, float dotLightNormal)
         }
 
     }
-    shadow = shadow/9; // 3x3 kernel, profile this for report
+    shadow = shadow/16; // 4x4 kernel, profile this for report
 
     if(projCoords.z > 1.0)
     {
